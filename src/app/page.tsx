@@ -1,65 +1,197 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+import { useAuthStore } from "@/stores/auth-store";
+
+const ease = [0.22, 1, 0.36, 1] as const;
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.12 + i * 0.1, duration: 0.55, ease },
+  }),
+};
+
+export default function LandingPage() {
+  const router = useRouter();
+  const { isAuthenticated, isHydrated } = useAuthStore();
+
+  useEffect(() => {
+    if (isHydrated && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isAuthenticated, isHydrated, router]);
+
+  if (isHydrated && isAuthenticated) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-[#eef4f0] text-sm text-[#5c6f65]">
+        Opening your farm…
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-dvh bg-[#eef4f0] text-[#14241c]">
+      <header className="relative z-20 mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image
+            src="/brand/loonkoo-logo.png"
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 object-contain"
+            priority
+          />
+          <span className="font-display text-lg font-extrabold tracking-tight">Loonkoo</span>
+        </Link>
+        <Link
+          href="/login"
+          className="text-sm font-semibold text-[#2f553c] underline-offset-4 hover:underline"
+        >
+          Sign in
+        </Link>
+      </header>
+
+      <section className="relative isolate overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 60% at 70% 40%, rgba(47,85,60,0.14), transparent 55%), radial-gradient(ellipse 50% 40% at 10% 90%, rgba(184,90,40,0.08), transparent 50%), linear-gradient(180deg, #eef4f0 0%, #e4ede7 100%)",
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 right-0 w-full max-w-3xl opacity-[0.18] sm:opacity-[0.22]"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.9, ease }}
+            className="absolute top-1/2 right-[-8%] h-[min(90vw,42rem)] w-[min(90vw,42rem)] -translate-y-1/2 sm:right-[-4%]"
           >
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+              src="/brand/loonkoo-logo.png"
+              alt=""
+              fill
+              priority
+              className="object-contain"
+              sizes="(max-width: 768px) 90vw, 42rem"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </motion.div>
         </div>
-      </main>
+
+        <div className="relative z-10 mx-auto flex min-h-[calc(100dvh-4.5rem)] w-full max-w-6xl flex-col justify-center px-5 pb-20 pt-10 sm:px-8 sm:pb-28 sm:pt-6">
+          <div className="max-w-xl">
+            <motion.p
+              custom={0}
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              className="font-display text-5xl font-extrabold tracking-tight text-[#2f553c] sm:text-6xl md:text-7xl"
+            >
+              Loonkoo
+            </motion.p>
+            <motion.h1
+              custom={1}
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              className="mt-4 max-w-md font-display text-2xl font-semibold tracking-tight text-[#14241c] sm:text-3xl"
+            >
+              Dairy days, clearly tracked.
+            </motion.h1>
+            <motion.p
+              custom={2}
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              className="mt-4 max-w-md text-base leading-relaxed text-[#5c6f65] sm:text-lg"
+            >
+              Milk, herd care, and farm numbers in one simple place — built for Ethiopian dairy
+              farms.
+            </motion.p>
+            <motion.div
+              custom={3}
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+              className="mt-8 flex flex-wrap items-center gap-3"
+            >
+              <Link
+                href="/register"
+                className="inline-flex h-12 items-center justify-center rounded-xl bg-[#2f553c] px-6 text-sm font-semibold text-[#f4faf7] transition hover:brightness-110"
+              >
+                Create your farm
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex h-12 items-center justify-center rounded-xl px-5 text-sm font-semibold text-[#2f553c] transition hover:bg-[#2f553c]/8"
+              >
+                Sign in
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-[#2f553c]/12 bg-[#f7faf8]">
+        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:grid-cols-3 sm:gap-8 sm:px-8 sm:py-20">
+          {[
+            {
+              title: "Milk",
+              body: "Log morning and evening yields, watch trends, and keep production honest.",
+            },
+            {
+              title: "Herd",
+              body: "Know each animal’s stage, breeding status, and what care is due next.",
+            },
+            {
+              title: "Farm numbers",
+              body: "See income and costs clearly — including milk value when you want it.",
+            },
+          ].map((item, i) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ delay: i * 0.08, duration: 0.45 }}
+            >
+              <h2 className="font-display text-xl font-bold tracking-tight text-[#2f553c]">
+                {item.title}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-[#5c6f65] sm:text-[0.95rem]">
+                {item.body}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="border-t border-[#2f553c]/10 bg-[#eef4f0]">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/brand/loonkoo-logo.png"
+              alt=""
+              width={24}
+              height={24}
+              className="h-6 w-6 object-contain"
+            />
+            <span className="font-display text-sm font-bold">Loonkoo</span>
+          </div>
+          <p className="text-xs text-[#5c6f65]">Dairy farm tracker for everyday work.</p>
+        </div>
+      </footer>
     </div>
   );
 }
