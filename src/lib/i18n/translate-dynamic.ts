@@ -1,7 +1,7 @@
 import type { Language } from "./index";
 
 const dynamicTranslations: Record<string, Record<Language, string>> = {
-  // Animal Classes & Categories
+  // Animal Classes & Categories & Stages
   "Lactating Cow": {
     en: "Lactating Cow",
     am: "የምትታለብ ላም",
@@ -12,7 +12,22 @@ const dynamicTranslations: Record<string, Record<Language, string>> = {
     am: "ያረፈች/የማትታለብ ላም",
     om: "Sa'a Aannan Dhaabde",
   },
-  "Heifer": {
+  Cow: {
+    en: "Cow",
+    am: "ላም",
+    om: "Sa'a",
+  },
+  "Pregnant Cow": {
+    en: "Pregnant Cow",
+    am: "እርጉዝ ላም",
+    om: "Sa'a Ulfa",
+  },
+  "Pregnant cow": {
+    en: "Pregnant Cow",
+    am: "እርጉዝ ላም",
+    om: "Sa'a Ulfa",
+  },
+  Heifer: {
     en: "Heifer",
     am: "ጊደር",
     om: "Goromsa",
@@ -27,15 +42,42 @@ const dynamicTranslations: Record<string, Record<Language, string>> = {
     am: "ለመራቦ የደረሰች ላም/ጊደር",
     om: "Dhala Horataaf Ga'e",
   },
-  "Calf": {
+  Calf: {
     en: "Calf",
     am: "ጥጃ",
     om: "Jabbii",
   },
-  "Bull": {
+  Bull: {
     en: "Bull",
     am: "ኮርማ",
     om: "Korma",
+  },
+
+  // Lactation Stages
+  LATE: {
+    en: "LATE",
+    am: "የመጨረሻ ማለብ (LATE)",
+    om: "Aannan Dhumaa (LATE)",
+  },
+  EARLY: {
+    en: "EARLY",
+    am: "የመጀመሪያ ማለብ (EARLY)",
+    om: "Aannan Jalqabaa (EARLY)",
+  },
+  MID: {
+    en: "MID",
+    am: "የመካከለኛ ማለብ (MID)",
+    om: "Aannan Giddu-galeessaa (MID)",
+  },
+  DRY: {
+    en: "DRY",
+    am: "ያረፈች/የማይታለብ (DRY)",
+    om: "Aannan Dhaabde (DRY)",
+  },
+  NOT_LACTATING: {
+    en: "NOT LACTATING",
+    am: "የማትታለብ",
+    om: "Aannan Kan Hin Kennine",
   },
 
   // Husbandry Window Titles & Events
@@ -69,6 +111,16 @@ const dynamicTranslations: Record<string, Record<Language, string>> = {
     am: "የእርግዝና ምርመራ",
     om: "Qorannoo Ulfaa",
   },
+  "Fresh-cow checkup window": {
+    en: "Fresh-cow checkup window",
+    am: "የወለደች አዲስ ላም ምርመራ ጊዜ",
+    om: "Yeroo Qorannoo Sa'a Haaraa Dhaala",
+  },
+  "Suggested dry-off window": {
+    en: "Suggested dry-off window",
+    am: "የተጠቆመ ማለብ ማቆሚያ ጊዜ",
+    om: "Yeroo Aannan Dhaabuu Eegamu",
+  },
   "Estimated Dry-off Window": {
     en: "Estimated Dry-off Window",
     am: "የተገመተ ማለብ ማቆሚያ ጊዜ",
@@ -84,6 +136,16 @@ const dynamicTranslations: Record<string, Record<Language, string>> = {
     am: "ማለብ የሚቆምበት ጊዜ",
     om: "Aannan Dhaabuu Dhiyaate",
   },
+  "Calving preparation window": {
+    en: "Calving preparation window",
+    am: "የወሊድ ዝግጅት ጊዜ",
+    om: "Yeroo Qophii Dhaloota",
+  },
+  "Calving preparation": {
+    en: "Calving preparation",
+    am: "የወሊድ ዝግጅት",
+    om: "Qophii Dhaloota",
+  },
   "Expected Calving Window": {
     en: "Expected Calving Window",
     am: "የሚጠበቅበት የወሊድ ጊዜ",
@@ -93,6 +155,16 @@ const dynamicTranslations: Record<string, Record<Language, string>> = {
     en: "Expected Calving",
     am: "የሚጠበቅ ወሊድ",
     om: "Dhaloota Eegamu",
+  },
+  "Dry-off before calving": {
+    en: "Dry-off before calving",
+    am: "ከወሊድ በፊት ማለብ ማቆም",
+    om: "Dhaloota Dura Aannan Dhaabuu",
+  },
+  "Dry-off": {
+    en: "Dry-off",
+    am: "ማለብ ማቆሚያ",
+    om: "Aannan Dhaabuu",
   },
   "Weaning Window": {
     en: "Weaning Window",
@@ -116,6 +188,16 @@ const dynamicTranslations: Record<string, Record<Language, string>> = {
   },
 
   // Warning Titles & Messages
+  "Overdue: Fresh-cow checkup window": {
+    en: "Overdue: Fresh-cow checkup window",
+    am: "ያለፈበት: የወለደች አዲስ ላም ምርመራ ጊዜ",
+    om: "Dabreera: Yeroo Qorannoo Sa'a Haaraa Dhaala",
+  },
+  "Overdue: First insemination window": {
+    en: "Overdue: First insemination window",
+    am: "ያለፈበት: የመጀመሪያ የማዳቀል ጊዜ",
+    om: "Dabreera: Yeroo Ulfeessaa Isa Jalqabaa",
+  },
   "Lactation without calving date": {
     en: "Lactation without calving date",
     am: "የወሊድ ቀን ሳይመዘገብ መታለብ",
@@ -146,8 +228,43 @@ const dynamicTranslations: Record<string, Record<Language, string>> = {
     am: "የእረፍት ጊዜ በሂደት ላይ ነው",
     om: "Yeroon boqonnaa hojiirra jira",
   },
+  "Heifer past first-breeding age": {
+    en: "Heifer past first-breeding age",
+    am: "ጊደር የመጀመሪያ የማዳቀል እድሜ አልፏል",
+    om: "Goromsi yeroo ulfeessaa jalqabaa dabarseera",
+  },
 
   // Descriptions & Messages
+  "Daily monitoring for 21 days post-calving.": {
+    en: "Daily monitoring for 21 days post-calving.",
+    am: "ከወለደች በኋላ ለ 21 ቀናት ዕለታዊ ክትትል ማድረግ።",
+    om: "Dhaloota booda guyyoota 21'iif hordoffii guyyaa.",
+  },
+  "Move to calving pen and monitor closely.": {
+    en: "Move to calving pen and monitor closely.",
+    am: "ወደ መውለጃ ቦታ ያዛውሩ እና በቅርበት ይከታተሉ።",
+    om: "Gara iddoo dhalootaatti jijjiiruun dhiyoon hordofaa.",
+  },
+  "Move to calving area, check supplies, monitor closely.": {
+    en: "Move to calving area, check supplies, monitor closely.",
+    am: "ወደ መውለጃ ቦታ ያዛውሩ፣ አስፈላጊ ቁሳቁሶችን ያዘጋጁ፣ በቅርበት ይከታተሉ።",
+    om: "Gara iddoo dhalootaatti jijjiiraa, meeshaalee qopheessaa, dhiyoon hordofaa.",
+  },
+  "Dry off ~60 days before expected calving. Dry-cow therapy / teat sealant as per protocol.": {
+    en: "Dry off ~60 days before expected calving. Dry-cow therapy / teat sealant as per protocol.",
+    am: "ከሚጠበቀው ወሊድ ~60 ቀናት በፊት ማለብ ያቁሙ። እንደ መመሪያው የደረቅ ላም ሕክምና ወይም ግብት መጠበቂያ ይስጡ።",
+    om: "Dhaloota eegamu dura guyyaa ~60 aannan dhaabaa.",
+  },
+  "Target dry-off before expected calving.": {
+    en: "Target dry-off before expected calving.",
+    am: "ከወሊድ በፊት ማለብ ማቆም ግብ።",
+    om: "Dhaloota eegamu dura aannan dhaabuu.",
+  },
+  "Expected calving date. Assist only if needed.": {
+    en: "Expected calving date. Assist only if needed.",
+    am: "የሚጠበቅበት የወሊድ ቀን። አስፈላጊ ከሆነ ብቻ ይረዱ።",
+    om: "Guyyaa dhaloota eegamu. Barbaachisaa qofa gargaaraa.",
+  },
   "Rest period post calving. Do not breed until complete.": {
     en: "Rest period post calving. Do not breed until complete.",
     am: "ከወሊድ በኋላ ያለ የእረፍት ጊዜ። እስከሚጠናቀቅ አያዳቅሉ።",
@@ -184,6 +301,23 @@ const dynamicTranslations: Record<string, Record<Language, string>> = {
     om: "Guyyaa dhaloota fi seenaa aannaniirraa kan shallagame.",
   },
 
+  // Breeding Event Badges
+  PREGNANT: {
+    en: "PREGNANT",
+    am: "እርጉዝ",
+    om: "ULFA",
+  },
+  CALVED: {
+    en: "CALVED",
+    am: "ወልዳለች",
+    om: "DHALCHEERA",
+  },
+  BRED: {
+    en: "BRED",
+    am: "ተዳቅላለች",
+    om: "ULFAAGGEE",
+  },
+
   // Relative Time Phrases
   Today: {
     en: "Today",
@@ -197,7 +331,53 @@ const dynamicPatterns: Array<{
   pattern: RegExp;
   translate: Record<Language, (match: string, ...groups: string[]) => string>;
 }> = [
-  // Heifer eligibility description: "Heifers typically eligible ~450 days of age (~15 months)."
+  // "Last calved 2025-07-23; last AI/service 2026-07-23."
+  {
+    pattern: /^Last calved (.*?);\s*last AI\/service (.*?)\.?$/i,
+    translate: {
+      en: (_m, cDate, aiDate) => `Last calved ${cDate}; last AI/service ${aiDate}.`,
+      am: (_m, cDate, aiDate) => `መጨረሻ የወለደችበት ${cDate}፤ መጨረሻ የተጠቃችበት/የተዳቀለችበት ${aiDate}።`,
+      om: (_m, cDate, aiDate) => `Dhaloota dhumaa ${cDate}; ulfeessaa dhumaa ${aiDate}.`,
+    },
+  },
+  // "Last calved 2025-07-23."
+  {
+    pattern: /^Last calved (.*?)\.?$/i,
+    translate: {
+      en: (_m, cDate) => `Last calved ${cDate}.`,
+      am: (_m, cDate) => `መጨረሻ የወለደችበት ${cDate}።`,
+      om: (_m, cDate) => `Dhaloota dhumaa ${cDate}.`,
+    },
+  },
+  // "5876 is 1486 days old and has no breeding/AI record (target ~450 days)."
+  {
+    pattern: /^(\S+)\s*is\s*(\d+)\s*days old and has no breeding\/AI record\s*\((.*?)\)\.?$/i,
+    translate: {
+      en: (_m, tag, days, target) => `${tag} is ${days} days old and has no breeding/AI record (${target}).`,
+      am: (_m, tag, days, target) =>
+        `ከብት ${tag} እድሜዋ ${days} ቀን ሲሆን ምንም የማዳቀል/AI መዝገብ የላትም (${target.replace("target", "ታለመው")})።`,
+      om: (_m, tag, days, target) => `${tag} umrii guyyaa ${days} kan qabduu fi galmee ulfeessaa hin qabdu (${target}).`,
+    },
+  },
+  // "~60 days before expected calving (2027-04-29)."
+  {
+    pattern: /^~?(\d+)\s*days before expected calving\s*\((.*?)\)\.?$/i,
+    translate: {
+      en: (_m, days, date) => `~${days} days before expected calving (${date}).`,
+      am: (_m, days, date) => `ከሚጠበቀው ወሊድ (${date}) ~${days} ቀናት በፊት።`,
+      om: (_m, days, date) => `Dhaloota eegamu (${date}) dura guyyaa ~${days}.`,
+    },
+  },
+  // "Gestation ~280 days from breeding/AI."
+  {
+    pattern: /^Gestation ~?(\d+)\s*days from breeding\/AI\.?$/i,
+    translate: {
+      en: (_m, days) => `Gestation ~${days} days from breeding/AI.`,
+      am: (_m, days) => `ከማዳቀል/AI በኋላ ~${days} ቀናት የእርግዝና ጊዜ።`,
+      om: (_m, days) => `Ulfeessaa/AI irraa guyyoota ~${days}.`,
+    },
+  },
+  // "Heifers typically eligible ~450 days of age (~15 months)."
   {
     pattern: /^Heifers typically eligible ~?(\d+)\s*days of age\s*\((.*?)\)\.?$/i,
     translate: {
@@ -207,6 +387,15 @@ const dynamicPatterns: Array<{
       om: (_m, days, months) => `Goromsi yeroo baay'ee umrii guyyaa ~${days} (${months}) ulfaaf ga'u.`,
     },
   },
+  // "Window ended 350 day(s) ago (2025-08-13)."
+  {
+    pattern: /^(?:Window ended|Closed)\s*(\d+)\s*day\(s\)\s*ago\s*\((.*?)\)\.?$/i,
+    translate: {
+      en: (_m, days, range) => `Window ended ${days} day(s) ago (${range}).`,
+      am: (_m, days, range) => `ጊዜው ከ ${days} ቀን(ናት) በፊት ተጠናቋል (${range})።`,
+      om: (_m, days, range) => `Yeroon guyyaa ${days} dura xumurameera (${range}).`,
+    },
+  },
   // "Opens in 300 day(s) (2027-05-25 → 2027-07-06)."
   {
     pattern: /^Opens in (\d+)\s*day\(s\)\s*\((.*?)\)\.?$/i,
@@ -214,15 +403,6 @@ const dynamicPatterns: Array<{
       en: (_m, days, range) => `Opens in ${days} day(s) (${range}).`,
       am: (_m, days, range) => `በ ${days} ቀን(ናት) ውስጥ ይጀምራል (${range})።`,
       om: (_m, days, range) => `Guyyaa ${days} keessatti banama (${range}).`,
-    },
-  },
-  // "Closed 10 day(s) ago (2027-05-25 → 2027-07-06)."
-  {
-    pattern: /^Closed (\d+)\s*day\(s\) ago\s*\((.*?)\)\.?$/i,
-    translate: {
-      en: (_m, days, range) => `Closed ${days} day(s) ago (${range}).`,
-      am: (_m, days, range) => `ከ ${days} ቀን(ናት) በፊት ተጠናቋል (${range})።`,
-      om: (_m, days, range) => `Guyyaa ${days} dura cufameera (${range}).`,
     },
   },
   // "Active now (2027-05-25 → 2027-07-06)."

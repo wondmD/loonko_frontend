@@ -340,10 +340,10 @@ export default function CattleDetailPage({
                   className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2 text-sm"
                 >
                   <span>
-                    {p.status}
+                    {translateDynamicText(p.status, language)}
                     {p.expected_calving_date ? ` · ${t("cattleDetail.due")} ${p.expected_calving_date}` : ""}
                   </span>
-                  <Badge>{p.status}</Badge>
+                  <Badge>{translateDynamicText(p.status, language)}</Badge>
                 </div>
               ))
             )}
@@ -357,7 +357,7 @@ export default function CattleDetailPage({
                   key={e.id}
                   className="rounded-xl border border-border px-3 py-2 text-sm"
                 >
-                  {e.mating_date} · {e.method}
+                  {e.mating_date} · {translateDynamicText(e.method, language)}
                 </div>
               ))
             )}
@@ -394,7 +394,7 @@ export default function CattleDetailPage({
             data.alerts.map((alert) => (
               <div key={alert.id} className="rounded-2xl border border-border px-4 py-3">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium">{alert.title}</p>
+                  <p className="font-medium">{translateDynamicText(alert.title, language)}</p>
                   <Badge
                     tone={
                       alert.severity === "CRITICAL"
@@ -404,10 +404,12 @@ export default function CattleDetailPage({
                           : "default"
                     }
                   >
-                    {alert.severity}
+                    {translateDynamicText(alert.severity, language)}
                   </Badge>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">{alert.message}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {translateDynamicText(alert.message, language)}
+                </p>
               </div>
             ))
           )}

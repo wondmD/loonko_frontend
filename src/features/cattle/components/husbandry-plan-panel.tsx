@@ -85,12 +85,16 @@ export function HusbandryPlanPanel({ plan }: { plan?: HusbandryPlan | null }) {
         <p className="text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
           {t("husbandryPlan.autoDetectedClass")}
         </p>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Badge tone="accent">
-            {translateDynamicText(cls.category_label || cls.category || "—", language)}
-          </Badge>
-          <Badge>{translateDynamicText(cls.label, language)}</Badge>
-        </div>
+        {(() => {
+          const catText = translateDynamicText(cls.category_label || cls.category || "—", language);
+          const labelText = translateDynamicText(cls.label, language);
+          return (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <Badge tone="accent">{catText}</Badge>
+              {labelText && labelText !== catText ? <Badge>{labelText}</Badge> : null}
+            </div>
+          );
+        })()}
         <p className="mt-2 text-sm text-muted-foreground">
           {translateDynamicText(cls.basis, language)}
         </p>

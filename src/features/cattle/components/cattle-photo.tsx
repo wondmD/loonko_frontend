@@ -4,6 +4,7 @@ import { Beef, Camera, ImagePlus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils/cn";
 
 function CowSilhouette({ className }: { className?: string }) {
@@ -137,10 +138,15 @@ function CameraCaptureModal({
   onClose: () => void;
   onCapture: (file: File) => void;
 }) {
+  const { language } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+
+  const tTake = language === "am" ? "ፎቶ አንሳ" : language === "om" ? "Suuraa Kaasi" : "Take photo";
+  const tCap = language === "am" ? "ፎቶውን ያንሱ" : language === "om" ? "Waraabi" : "Capture";
+  const tCancel = language === "am" ? "ሰርዝ" : language === "om" ? "Dhiisi" : "Cancel";
 
   useEffect(() => {
     if (!open) return;
@@ -152,7 +158,11 @@ function CameraCaptureModal({
     async function start() {
       try {
         if (!navigator.mediaDevices?.getUserMedia) {
-          setError("Camera is not supported in this browser. Use Take photo on a phone, or choose from gallery.");
+          setError(
+            language === "am"
+              ? "ካሜራው በዚህ ብራውዘር አይደገፍም። ከጋለሪ ይምረጡ።"
+              : "Camera is not supported in this browser. Choose photo from gallery.",
+          );
           return;
         }
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -174,7 +184,11 @@ function CameraCaptureModal({
           setReady(true);
         }
       } catch {
-        setError("Could not open the camera. Allow camera access, or choose a photo from gallery.");
+        setError(
+          language === "am"
+            ? "ካሜራውን መክፈት አልተቻለም። ፈቃድ ይስጡ ወይም ከጋለሪ ይምረጡ።"
+            : "Could not open camera. Allow access or choose from gallery.",
+        );
       }
     }
 
@@ -185,7 +199,7 @@ function CameraCaptureModal({
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     };
-  }, [open]);
+  }, [open, language]);
 
   function stopCamera() {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -236,7 +250,7 @@ function CameraCaptureModal({
       <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-t-3xl border border-border bg-card p-4 shadow-[var(--shadow-md)] sm:rounded-3xl">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
-            <p className="font-display text-lg font-semibold">Take photo</p>
+            <p className="font-display text-lg font-semibold">{tTake}</p>
             <p className="text-xs text-muted-foreground">{label}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={handleClose} aria-label="Close">
@@ -254,7 +268,7 @@ function CameraCaptureModal({
           />
           {!ready && !error ? (
             <div className="absolute inset-0 flex items-center justify-center text-sm text-white/80">
-              Starting camera…
+              {language === "am" ? "ካሜራ በመክፈት ላይ..." : "Starting camera…"}
             </div>
           ) : null}
         </div>
@@ -264,10 +278,10 @@ function CameraCaptureModal({
         <div className="mt-4 flex gap-2">
           <Button type="button" className="flex-1" onClick={shoot} disabled={!ready}>
             <Camera className="h-4 w-4" />
-            Capture
+            {tCap}
           </Button>
           <Button type="button" variant="secondary" onClick={handleClose}>
-            Cancel
+            {tCancel}
           </Button>
         </div>
       </div>
@@ -286,8 +300,19 @@ export function PhotoUploadField({
   onChange: (file: File | null) => void;
   required?: boolean;
 }) {
+  const { language } = useTranslation();
   const galleryRef = useRef<HTMLInputElement>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
+
+  const tGal = language === "am" ? "ጋለሪ" : language === "om" ? "Galaarii" : "Gallery";
+  const tPhoto = language === "am" ? "ፎቶ አንሳ" : language === "om" ? "Suuraa Kaasi" : "Take photo";
+  const tClear = language === "am" ? "አጽዳ" : language === "om" ? "Qulqulleessi" : "Clear";
+  const tHelp =
+    language === "am"
+      ? "ጋለሪ ፋይሎችን ይከፍታል። ፎቶ አንሳ ካሜራውን ይከፍታል።"
+      : language === "om"
+        ? "Galaariin faayiloota bana. Suuraa kaasi kaameraa bana."
+        : "Gallery opens files. Take photo opens the camera.";
 
   function handleFile(file: File | null) {
     onChange(file);
@@ -311,7 +336,7 @@ export function PhotoUploadField({
               onClick={() => galleryRef.current?.click()}
             >
               <ImagePlus className="h-4 w-4" />
-              Gallery
+              {tGal}
             </Button>
             <Button
               type="button"
@@ -320,17 +345,15 @@ export function PhotoUploadField({
               onClick={() => setCameraOpen(true)}
             >
               <Camera className="h-4 w-4" />
-              Take photo
+              {tPhoto}
             </Button>
             {preview ? (
               <Button type="button" variant="ghost" size="sm" onClick={() => handleFile(null)}>
-                Clear
+                {tClear}
               </Button>
             ) : null}
           </div>
-          <p className="text-xs text-muted-foreground">
-            Gallery opens files. Take photo opens the camera.
-          </p>
+          <p className="text-xs text-muted-foreground">{tHelp}</p>
         </div>
       </div>
 
