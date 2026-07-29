@@ -23,11 +23,24 @@ export function useMilk(params?: Record<string, string | number | undefined>) {
     queryFn: () => milkApi.trends({ days: 30, group: "day" }),
   });
 
+  const herd = useQuery({
+    queryKey: ["milk", "herd"],
+    queryFn: () => milkApi.herd(),
+  });
+
   const create = useMutation({
     mutationFn: milkApi.create,
     meta: { successMessage: "Milk record saved" },
     onSuccess: () => invalidateFarmModules(queryClient),
   });
 
-  return { list, summary, trends, create };
+  return { list, summary, trends, herd, create };
+}
+
+export function useMilkCattleHistory(cattleId: number) {
+  return useQuery({
+    queryKey: ["milk", "herd", cattleId],
+    queryFn: () => milkApi.cattleHistory(cattleId),
+    enabled: Number.isFinite(cattleId) && cattleId > 0,
+  });
 }

@@ -8,9 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { LanguageSelector } from "@/components/ui/language-selector";
 import { getMutationError, useAuth } from "@/features/auth/hooks/use-auth";
-import { ROLE_LABELS } from "@/lib/auth/access";
 import { displayName } from "@/lib/utils/cn";
+import { useTranslation } from "@/lib/i18n";
 import { useAuthStore } from "@/stores/auth-store";
 import { useState } from "react";
 
@@ -30,6 +31,7 @@ export function ProfileModal({
   onClose: () => void;
 }) {
   const user = useAuthStore((s) => s.user);
+  const { t } = useTranslation();
   const { updateProfile, updateProfilePending } = useAuth();
   const [editing, setEditing] = useState(false);
 
@@ -42,7 +44,7 @@ export function ProfileModal({
         setEditing(false);
         onClose();
       }}
-      title="Your profile"
+      title={t("profile.title")}
       className="sm:max-w-md"
     >
       <div className="mb-5 flex items-center gap-3">
@@ -54,7 +56,7 @@ export function ProfileModal({
             {displayName(user)}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <Badge tone="accent">{ROLE_LABELS[user.role]}</Badge>
+            <Badge tone="accent">{t(`roles.${user.role}`)}</Badge>
             {user.farm_name ? <Badge>{user.farm_name}</Badge> : null}
           </div>
         </div>
@@ -62,9 +64,9 @@ export function ProfileModal({
 
       {!editing ? (
         <div className="space-y-3">
-          <Row label="Email" value={user.email} />
+          <Row label={t("auth.email")} value={user.email} />
           <Row label="Username" value={user.username} />
-          <Row label="Phone" value={user.phone || "—"} />
+          <Row label={t("auth.phone")} value={user.phone || "—"} />
           <Row
             label="Member since"
             value={
@@ -77,12 +79,18 @@ export function ProfileModal({
                 : "—"
             }
           />
+          <div className="rounded-xl bg-muted/40 p-3">
+            <p className="mb-2 text-xs font-semibold text-muted-foreground uppercase">
+              {t("profile.language")}
+            </p>
+            <LanguageSelector variant="full" />
+          </div>
           <div className="flex gap-2 pt-2">
             <Button className="flex-1" onClick={() => setEditing(true)}>
-              Edit profile
+              {t("common.edit")}
             </Button>
             <Button variant="secondary" onClick={onClose}>
-              Close
+              {t("common.close")}
             </Button>
           </div>
         </div>
@@ -124,7 +132,7 @@ export function ProfileModal({
                 />
               </div>
               <Input
-                label="Email"
+                label={t("auth.email")}
                 name="email"
                 type="email"
                 value={values.email}
@@ -141,7 +149,7 @@ export function ProfileModal({
                 error={touched.username ? errors.username : undefined}
               />
               <Input
-                label="Phone"
+                label={t("auth.phone")}
                 name="phone"
                 value={values.phone}
                 onChange={handleChange}
@@ -150,10 +158,10 @@ export function ProfileModal({
               {status ? <p className="text-sm text-danger">{status}</p> : null}
               <div className="flex gap-2 pt-1">
                 <Button type="submit" className="flex-1" loading={updateProfilePending}>
-                  Save changes
+                  {t("common.save")}
                 </Button>
                 <Button type="button" variant="secondary" onClick={() => setEditing(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
               </div>
             </Form>

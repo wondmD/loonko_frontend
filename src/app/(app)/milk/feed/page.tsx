@@ -18,6 +18,7 @@ import { getMutationError } from "@/features/auth/hooks/use-auth";
 import { useCattle } from "@/features/cattle/hooks/use-cattle";
 import { useFeed } from "@/features/milk/hooks/use-feed";
 import { canAccess } from "@/lib/auth/access";
+import { useTranslation } from "@/lib/i18n";
 import { formatMoney } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -34,6 +35,7 @@ const schema = Yup.object({
 function FeedContent() {
   const role = useAuthStore((s) => s.user?.role);
   const canWrite = canAccess(role, "milkWrite");
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const feed = useFeed();
   const cattle = useCattle({ status: "ACTIVE" });
@@ -47,13 +49,13 @@ function FeedContent() {
   return (
     <div>
       <PageHeader
-        title="Milk"
-        description="Feed given to the herd. Optional cost posts to Finance."
+        title={t("feedPage.title")}
+        description={t("feedPage.description")}
         actions={
           canWrite ? (
             <Button onClick={() => setOpen(true)}>
               <Plus className="h-4 w-4" />
-              Log feed
+              {t("feedPage.logFeed")}
             </Button>
           ) : null
         }
@@ -61,8 +63,8 @@ function FeedContent() {
 
       <ModuleTabs
         items={[
-          { href: "/milk", label: "Production", exact: true },
-          { href: "/milk/feed", label: "Feed" },
+          { href: "/milk", label: t("milk.milkLogs"), exact: true },
+          { href: "/milk/feed", label: t("feedPage.title") },
         ]}
       />
 
@@ -71,7 +73,7 @@ function FeedContent() {
         <ErrorState message="Failed to load feed logs." onRetry={() => feed.list.refetch()} />
       ) : null}
       {!feed.list.isLoading && rows.length === 0 ? (
-        <EmptyState title="No feed logs" description="Record concentrate, hay, or silage here." />
+        <EmptyState title={t("feedPage.noFeedLogs")} description={t("feedPage.noFeedLogsHint")} />
       ) : null}
 
       <div className="space-y-3">
@@ -83,7 +85,7 @@ function FeedContent() {
             <div>
               <p className="font-medium">
                 {row.feed_type}
-                {row.cattle_tag ? ` · ${row.cattle_tag}` : " · Herd"}
+                {row.cattle_tag ? ` · ${row.cattle_tag}` : ` · ${t("feedPage.wholeHerd")}`}
               </p>
               <p className="text-xs text-muted-foreground">
                 {row.date} · {row.quantity} {row.unit}
@@ -94,14 +96,14 @@ function FeedContent() {
             </div>
             {canWrite ? (
               <Button size="sm" variant="ghost" onClick={() => feed.remove.mutate(row.id)}>
-                Delete
+                {t("common.delete")}
               </Button>
             ) : null}
           </div>
         ))}
       </div>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Log feed">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("feedPage.logFeed")}>
         <Formik
           initialValues={{
             cattle: "",
@@ -136,15 +138,15 @@ function FeedContent() {
           {({ values, handleChange, handleBlur, status }) => (
             <Form className="space-y-4">
               <Select
-                label="Cattle (optional)"
+                label={t("feedPage.cattleOptional")}
                 name="cattle"
                 value={values.cattle}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                options={[{ label: "Whole herd", value: "" }, ...options]}
+                options={[{ label: t("feedPage.wholeHerd"), value: "" }, ...options]}
               />
               <Input
-                label="Feed type"
+                label={t("feedPage.feedType")}
                 name="feed_type"
                 value={values.feed_type}
                 onChange={handleChange}
@@ -153,7 +155,7 @@ function FeedContent() {
               />
               <div className="grid grid-cols-2 gap-3">
                 <Input
-                  label="Quantity"
+                  label={t("feedPage.quantity")}
                   name="quantity"
                   type="number"
                   step="0.1"
@@ -162,7 +164,7 @@ function FeedContent() {
                   onBlur={handleBlur}
                 />
                 <Input
-                  label="Unit"
+                  label={t("feedPage.unit")}
                   name="unit"
                   value={values.unit}
                   onChange={handleChange}
@@ -170,7 +172,7 @@ function FeedContent() {
                 />
               </div>
               <Input
-                label="Date"
+                label={t("common.date")}
                 name="date"
                 type="date"
                 value={values.date}
@@ -178,7 +180,7 @@ function FeedContent() {
                 onBlur={handleBlur}
               />
               <Input
-                label="Cost (optional)"
+                label={t("feedPage.costOptional")}
                 name="cost"
                 type="number"
                 step="0.01"
@@ -187,7 +189,7 @@ function FeedContent() {
                 onBlur={handleBlur}
               />
               <Textarea
-                label="Notes"
+                label={t("cattle.notes")}
                 name="notes"
                 value={values.notes}
                 onChange={handleChange}
@@ -195,7 +197,7 @@ function FeedContent() {
               />
               {status ? <p className="text-sm text-danger">{status}</p> : null}
               <Button type="submit" className="w-full" loading={feed.create.isPending}>
-                Save feed log
+                {t("common.save")}
               </Button>
             </Form>
           )}

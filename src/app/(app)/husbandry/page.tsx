@@ -16,8 +16,11 @@ import { canAccess } from "@/lib/auth/access";
 import { useAuthStore } from "@/stores/auth-store";
 import type { HusbandryTask } from "@/types";
 
+import { useTranslation } from "@/lib/i18n";
+
 export default function HusbandryPage() {
   const role = useAuthStore((s) => s.user?.role);
+  const { t } = useTranslation();
   const canSync = role === "OWNER";
   const canWrite = canAccess(role, "husbandryWrite");
   const board = useHusbandryBoard(21);
@@ -35,9 +38,8 @@ export default function HusbandryPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Care calendar"
-        title="Cattle husbandry"
-        description="Automated female dairy lifecycle: rearing, heat, breeding, pregnancy, dry-off, calving, and fresh-cow care."
+        title={t("husbandry.title")}
+        description={t("husbandry.subtitle")}
         actions={
           canSync ? (
             <Button
@@ -46,22 +48,22 @@ export default function HusbandryPage() {
               onClick={() => sync.mutate(undefined)}
             >
               <RefreshCw className="h-4 w-4" />
-              Resync schedules
+              {t("common.save")}
             </Button>
           ) : null
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Overdue" value={String(counts.overdue)} hint="Needs attention now" />
-        <StatCard label="Due today" value={String(counts.due_today)} />
-        <StatCard label="Next 21 days" value={String(counts.upcoming)} />
+        <StatCard label={t("husbandry.overdueTasks")} value={String(counts.overdue)} hint="Needs attention now" />
+        <StatCard label={t("husbandry.todaysTasks")} value={String(counts.due_today)} />
+        <StatCard label={t("dashboard.last30Days")} value={String(counts.upcoming)} />
       </div>
 
       {empty ? (
         <EmptyState
           icon={CalendarClock}
-          title="No open husbandry tasks"
+          title={t("husbandry.taskCompleted")}
           description={
             canWrite
               ? "Add female cattle or log breeding/calving and the schedule will rebuild automatically."
@@ -70,9 +72,9 @@ export default function HusbandryPage() {
         />
       ) : null}
 
-      <TaskSection title="Overdue" tasks={overdue} />
-      <TaskSection title="Due today" tasks={due_today} />
-      <TaskSection title="Upcoming" tasks={upcoming} />
+      <TaskSection title={t("husbandry.overdueTasks")} tasks={overdue} />
+      <TaskSection title={t("husbandry.todaysTasks")} tasks={due_today} />
+      <TaskSection title={t("dashboard.careQueue")} tasks={upcoming} />
     </div>
   );
 }

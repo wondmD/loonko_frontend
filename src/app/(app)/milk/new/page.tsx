@@ -13,6 +13,7 @@ import { Select } from "@/components/ui/select";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
 import { useCattle } from "@/features/cattle/hooks/use-cattle";
 import { useMilk } from "@/features/milk/hooks/use-milk";
+import { useTranslation } from "@/lib/i18n";
 
 const schema = Yup.object({
   cattle: Yup.string().required("Select cattle"),
@@ -25,6 +26,7 @@ function MilkNewForm() {
   const router = useRouter();
   const milk = useMilk();
   const cattle = useCattle({ status: "ACTIVE" });
+  const { t } = useTranslation();
   const options =
     cattle.list.data?.results.map((c) => ({
       label: `${c.tag_id}${c.name ? ` — ${c.name}` : ""}`,
@@ -33,10 +35,10 @@ function MilkNewForm() {
 
   return (
     <div>
-      <PageHeader title="Quick milk entry" description="Optimized for fast mobile logging." />
+      <PageHeader title={t("milk.logYield")} description="Optimized for fast mobile logging." />
       <Card>
         <CardHeader>
-          <h2 className="font-display text-lg font-semibold">Today’s yield</h2>
+          <h2 className="font-display text-lg font-semibold">{t("dashboard.todayMilk")}</h2>
         </CardHeader>
         <CardContent>
           <Formik
@@ -65,16 +67,16 @@ function MilkNewForm() {
             {({ values, errors, touched, handleChange, handleBlur, status }) => (
               <Form className="space-y-4">
                 <Select
-                  label="Cattle"
+                  label={t("cattle.title")}
                   name="cattle"
                   value={values.cattle}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  options={[{ label: "Select…", value: "" }, ...options]}
+                  options={[{ label: `${t("common.select")}…`, value: "" }, ...options]}
                   error={touched.cattle ? errors.cattle : undefined}
                 />
                 <Input
-                  label="Date"
+                  label={t("common.date")}
                   name="date"
                   type="date"
                   value={values.date}
@@ -83,7 +85,7 @@ function MilkNewForm() {
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <Input
-                    label="Morning (L)"
+                    label={`${t("dashboard.morning")} (${t("milk.litersAbbr")})`}
                     name="morning_liters"
                     type="number"
                     step="0.1"
@@ -92,7 +94,7 @@ function MilkNewForm() {
                     onBlur={handleBlur}
                   />
                   <Input
-                    label="Evening (L)"
+                    label={`${t("dashboard.evening")} (${t("milk.litersAbbr")})`}
                     name="evening_liters"
                     type="number"
                     step="0.1"
@@ -103,7 +105,7 @@ function MilkNewForm() {
                 </div>
                 {status ? <p className="text-sm text-danger">{status}</p> : null}
                 <Button type="submit" className="w-full" size="lg" loading={milk.create.isPending}>
-                  Save
+                  {t("common.save")}
                 </Button>
               </Form>
             )}

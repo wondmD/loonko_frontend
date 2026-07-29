@@ -18,14 +18,9 @@ import { canAccess } from "@/lib/auth/access";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/auth-store";
 
-type CategoryTab = "ALL" | "CALF" | "HEIFER" | "COW";
+import { useTranslation } from "@/lib/i18n";
 
-const CATEGORY_TABS: Array<{ key: CategoryTab; label: string }> = [
-  { key: "ALL", label: "All" },
-  { key: "CALF", label: "Calves" },
-  { key: "HEIFER", label: "Heifers" },
-  { key: "COW", label: "Cows" },
-];
+type CategoryTab = "ALL" | "CALF" | "HEIFER" | "COW";
 
 const STATUS_FILTERS: Array<{ key: string; label: string }> = [
   { key: "", label: "Any status" },
@@ -41,10 +36,18 @@ const STATUS_FILTERS: Array<{ key: string; label: string }> = [
 
 export default function CattlePage() {
   const role = useAuthStore((s) => s.user?.role);
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<CategoryTab>("ALL");
   const [herdFilter, setHerdFilter] = useState("");
   const [open, setOpen] = useState(false);
+
+  const categoryTabs: Array<{ key: CategoryTab; label: string }> = [
+    { key: "ALL", label: t("cattle.allStatuses") },
+    { key: "CALF", label: t("cattle.calf") },
+    { key: "HEIFER", label: t("cattle.heifer") },
+    { key: "COW", label: t("cattle.lactating") },
+  ];
 
   const listParams = useMemo(() => {
     const params: Record<string, string> = {};
@@ -67,13 +70,13 @@ export default function CattlePage() {
   return (
     <div>
       <PageHeader
-        title="Herd"
-        description="Browse animals by stage. Search by tag or name."
+        title={t("cattle.title")}
+        description={t("cattle.subtitle")}
         actions={
           canWrite ? (
             <Button onClick={() => setOpen(true)}>
               <Plus className="h-4 w-4" />
-              Add animal
+              {t("cattle.addCattle")}
             </Button>
           ) : null
         }
@@ -83,7 +86,7 @@ export default function CattlePage() {
 
       <div className="mb-5 space-y-3">
         <div className="flex flex-wrap gap-1 rounded-xl bg-muted/70 p-1">
-          {CATEGORY_TABS.map((tab) => {
+          {categoryTabs.map((tab) => {
             const count = categoryCounts?.[tab.key];
             const active = category === tab.key;
             return (
@@ -113,7 +116,7 @@ export default function CattlePage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search tag or name…"
+              placeholder={t("cattle.searchPlaceholder")}
               className="h-10 w-full rounded-xl border border-border bg-card pr-3 pl-10 text-sm"
             />
           </label>
@@ -139,7 +142,7 @@ export default function CattlePage() {
       {!list.isLoading && !list.isError && rows.length === 0 ? (
         <EmptyState
           icon={Beef}
-          title="No animals match"
+          title={t("cattle.noCattle")}
           description="Try another filter, or add an animal to the herd."
         />
       ) : null}
@@ -180,7 +183,7 @@ export default function CattlePage() {
                     </div>
                     {cow.sex === "MALE" ? (
                       <span className="rounded-md bg-white/20 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-white uppercase backdrop-blur-sm">
-                        Male
+                        {t("cattle.male")}
                       </span>
                     ) : null}
                   </div>

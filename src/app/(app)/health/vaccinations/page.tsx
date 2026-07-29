@@ -16,6 +16,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
 import { useCattle } from "@/features/cattle/hooks/use-cattle";
 import { useHealth } from "@/features/health/hooks/use-health";
+import { useTranslation } from "@/lib/i18n";
 import { formatMoney } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -31,6 +32,7 @@ const schema = Yup.object({
 export default function VaccinationsPage() {
   const role = useAuthStore((s) => s.user?.role);
   const canWrite = role === "OWNER" || role === "VETERINARIAN";
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const health = useHealth();
   const cattle = useCattle({ status: "ACTIVE" });
@@ -41,13 +43,13 @@ export default function VaccinationsPage() {
   return (
     <div>
       <PageHeader
-        title="Health"
+        title={t("health.vaccinations")}
         description="Immunization schedule and history."
         actions={
           canWrite ? (
             <Button onClick={() => setOpen(true)}>
               <Plus className="h-4 w-4" />
-              Add vaccination
+              {t("common.add")}
             </Button>
           ) : null
         }
@@ -55,9 +57,9 @@ export default function VaccinationsPage() {
 
       <ModuleTabs
         items={[
-          { href: "/health", label: "Records", exact: true },
-          { href: "/health/vaccinations", label: "Vaccinations" },
-          { href: "/health/treatments", label: "Treatments" },
+          { href: "/health", label: t("health.records"), exact: true },
+          { href: "/health/vaccinations", label: t("health.vaccinations") },
+          { href: "/health/treatments", label: t("health.treatments") },
         ]}
       />
 
@@ -69,7 +71,7 @@ export default function VaccinationsPage() {
         />
       ) : null}
       {!health.vaccinations.isLoading && rows.length === 0 ? (
-        <EmptyState title="No vaccinations" description="Record administered vaccines here." />
+        <EmptyState title={t("health.noVaccinations")} description="Record administered vaccines here." />
       ) : null}
 
       <div className="space-y-3">
@@ -91,7 +93,7 @@ export default function VaccinationsPage() {
         ))}
       </div>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Add vaccination">
+      <Modal open={open} onClose={() => setOpen(false)} title={`${t("common.add")} ${t("health.vaccinations")}`}>
         <Formik
           initialValues={{
             cattle: options[0]?.value || "",
@@ -124,15 +126,15 @@ export default function VaccinationsPage() {
           {({ values, handleChange, handleBlur, status }) => (
             <Form className="space-y-4">
               <Select
-                label="Cattle"
+                label={t("cattle.title")}
                 name="cattle"
                 value={values.cattle}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                options={[{ label: "Select…", value: "" }, ...options]}
+                options={[{ label: `${t("common.select")}…`, value: "" }, ...options]}
               />
               <Input
-                label="Vaccine"
+                label={t("health.vaccine")}
                 name="vaccine_name"
                 value={values.vaccine_name}
                 onChange={handleChange}
@@ -162,7 +164,7 @@ export default function VaccinationsPage() {
                 onBlur={handleBlur}
               />
               <Input
-                label="Cost (optional)"
+                label={t("feedPage.costOptional")}
                 name="cost"
                 type="number"
                 step="0.01"
@@ -176,7 +178,7 @@ export default function VaccinationsPage() {
                 className="w-full"
                 loading={health.createVaccination.isPending}
               >
-                Save
+                {t("common.save")}
               </Button>
             </Form>
           )}

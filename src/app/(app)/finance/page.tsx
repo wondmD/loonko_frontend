@@ -37,9 +37,12 @@ const schema = Yup.object({
   description: Yup.string(),
 });
 
+import { useTranslation } from "@/lib/i18n";
+
 function FinanceContent() {
   const [open, setOpen] = useState(false);
   const finance = useFinance();
+  const { t } = useTranslation();
   const rows = finance.list.data?.results ?? [];
   const chartData =
     finance.byCategory.data?.breakdown.map((b) => ({
@@ -50,16 +53,12 @@ function FinanceContent() {
   return (
     <div>
       <PageHeader
-        title="Finance"
-        description={
-          finance.summary.data?.mode === "CASH"
-            ? "Cash mode: profit uses milk cash sales (not production valuation)."
-            : "Accrual mode: profit uses production income; cash milk sales tracked separately."
-        }
+        title={t("finance.title")}
+        description={t("finance.subtitle")}
         actions={
           <Button onClick={() => setOpen(true)}>
             <Plus className="h-4 w-4" />
-            Add transaction
+            {t("finance.addTransaction")}
           </Button>
         }
       />
@@ -74,7 +73,7 @@ function FinanceContent() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <StatCard
-          label="Income"
+          label={t("finance.income")}
           value={formatMoney(finance.summary.data?.income, finance.summary.data?.currency)}
           hint={
             finance.summary.data?.mode === "CASH"
@@ -83,11 +82,11 @@ function FinanceContent() {
           }
         />
         <StatCard
-          label="Expenses"
+          label={t("finance.expense")}
           value={formatMoney(finance.summary.data?.expense, finance.summary.data?.currency)}
         />
         <StatCard
-          label="Profit"
+          label={t("finance.netProfit")}
           value={formatMoney(finance.summary.data?.profit, finance.summary.data?.currency)}
         />
       </div>
@@ -119,7 +118,7 @@ function FinanceContent() {
             )}
           />
           <StatCard
-            label="Cash milk sales"
+            label={t("finance.milkSalesRevenue")}
             value={formatMoney(
               finance.summary.data.milk.cash_sales,
               finance.summary.data.milk.currency,
@@ -135,7 +134,7 @@ function FinanceContent() {
 
       <Card className="mb-6">
         <CardHeader>
-          <h2 className="font-display text-lg font-semibold">By category</h2>
+          <h2 className="font-display text-lg font-semibold">{t("finance.category")}</h2>
         </CardHeader>
         <CardContent className="h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -192,7 +191,7 @@ function FinanceContent() {
         </div>
       )}
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Add transaction">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("finance.addTransaction")}>
         <Formik
           initialValues={{
             type: "EXPENSE",
@@ -231,27 +230,27 @@ function FinanceContent() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 options={[
-                  { label: "Income", value: "INCOME" },
-                  { label: "Expense", value: "EXPENSE" },
+                  { label: t("finance.income"), value: "INCOME" },
+                  { label: t("finance.expense"), value: "EXPENSE" },
                 ]}
               />
               <Select
-                label="Category"
+                label={t("finance.category")}
                 name="category"
                 value={values.category}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 options={[
-                  { label: "Milk cash sale", value: "milk_sale" },
-                  { label: "Feed", value: "feed" },
-                  { label: "Veterinary", value: "vet" },
+                  { label: t("finance.milkSales"), value: "milk_sale" },
+                  { label: t("finance.feedCost"), value: "feed" },
+                  { label: t("finance.vetCost"), value: "vet" },
                   { label: "Labor", value: "labor" },
-                  { label: "Maintenance", value: "maintenance" },
-                  { label: "Other", value: "other" },
+                  { label: t("finance.equipmentCost"), value: "maintenance" },
+                  { label: t("finance.other"), value: "other" },
                 ]}
               />
               <Input
-                label={`Amount (${finance.summary.data?.currency || "ETB"})`}
+                label={`${t("finance.amount")} (${finance.summary.data?.currency || "ETB"})`}
                 name="amount"
                 type="number"
                 value={values.amount}
@@ -275,7 +274,7 @@ function FinanceContent() {
               />
               {status ? <p className="text-sm text-danger">{status}</p> : null}
               <Button type="submit" className="w-full" loading={finance.create.isPending}>
-                Save
+                {t("common.save")}
               </Button>
             </Form>
           )}

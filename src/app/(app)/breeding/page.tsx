@@ -1,8 +1,9 @@
 "use client";
 
 import { Form, Formik } from "formik";
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import { ChevronRight, Dna, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import * as Yup from "yup";
 
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,9 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 import { Textarea } from "@/components/ui/textarea";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
 import { useBreeding } from "@/features/breeding/hooks/use-breeding";
+import { BREEDING_TABS } from "@/features/breeding/breeding-tabs";
 import { useCattle } from "@/features/cattle/hooks/use-cattle";
+import type { BreedingHerdRow } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
 const eventSchema = Yup.object({
@@ -26,20 +29,53 @@ const eventSchema = Yup.object({
   notes: Yup.string(),
 });
 
-const BREEDING_TABS = [
-  { href: "/breeding", label: "Mating", exact: true },
-  { href: "/breeding/calving", label: "Calving" },
-];
+function formatShortDate(value: string | null | undefined) {
+  if (!value) return "—";
+  try {
+    return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return value;
+  }
+}
+
+function pregnancyTone(state: BreedingHerdRow["pregnancy_state"]) {
+  if (state === "pregnant") return "accent" as const;
+  if (state === "unconfirmed") return "warning" as const;
+  return "default" as const;
+}
+
+function formatEventTiming(daysUntil: number | undefined, overdue?: boolean) {
+  if (daysUntil == null) return "";
+  if (overdue || daysUntil < 0) return `${Math.abs(daysUntil)}d overdue`;
+  if (daysUntil === 0) return "today";
+  return `in ${daysUntil}d`;
+}
+
+import { useTranslation } from "@/lib/i18n";
 
 export default function BreedingPage() {
+  const router = useRouter();
   const role = useAuthStore((s) => s.user?.role);
+  const { t } = useTranslation();
   const canCreateEvent = role === "OWNER" || role === "WORKER";
   const canConfirm = role === "OWNER" || role === "VETERINARIAN";
   const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState<"all" | "pregnant" | "unconfirmed" | "not_pregnant">(
+    "all",
+  );
   const breeding = useBreeding();
   const cattle = useCattle({ status: "ACTIVE" });
-  const events = breeding.events.data?.results ?? [];
-  const pregnancies = breeding.pregnancies.data?.results ?? [];
+  const rows = breeding.herd.data?.results ?? [];
+
+  const filtered = useMemo(() => {
+    if (filter === "all") return rows;
+    return rows.filter((r) => r.pregnancy_state === filter);
+  }, [rows, filter]);
+
   const options =
     cattle.list.data?.results
       .filter((c) => c.sex !== "MALE")
@@ -48,16 +84,26 @@ export default function BreedingPage() {
         value: String(c.id),
       })) ?? [];
 
+  const counts = useMemo(
+    () => ({
+      all: rows.length,
+      pregnant: rows.filter((r) => r.pregnancy_state === "pregnant").length,
+      unconfirmed: rows.filter((r) => r.pregnancy_state === "unconfirmed").length,
+      not_pregnant: rows.filter((r) => r.pregnancy_state === "not_pregnant").length,
+    }),
+    [rows],
+  );
+
   return (
     <div>
       <PageHeader
-        title="Breeding"
-        description="Mating events and pregnancy tracking."
+        title={t("breeding.title")}
+        description={t("breeding.subtitle")}
         actions={
           canCreateEvent ? (
             <Button onClick={() => setOpen(true)}>
               <Plus className="h-4 w-4" />
-              Log mating
+              {t("breeding.recordInsemination")}
             </Button>
           ) : null
         }
@@ -65,83 +111,173 @@ export default function BreedingPage() {
 
       <ModuleTabs items={BREEDING_TABS} />
 
-      {breeding.events.isLoading || breeding.pregnancies.isLoading ? <LoadingState /> : null}
-      {breeding.events.isError ? (
+      <div className="mb-4 flex flex-wrap gap-2">
+        {(
+          [
+            ["all", t("cattle.allStatuses")],
+            ["pregnant", t("cattle.pregnant")],
+            ["unconfirmed", t("breeding.unconfirmed")],
+            ["not_pregnant", t("cattle.dry")],
+          ] as const
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setFilter(key)}
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+              filter === key
+                ? "bg-foreground text-background"
+                : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {label} ({counts[key]})
+          </button>
+        ))}
+      </div>
+
+      {breeding.herd.isLoading ? <LoadingState /> : null}
+      {breeding.herd.isError ? (
         <ErrorState
-          message="Failed to load breeding data."
-          onRetry={() => breeding.events.refetch()}
+          message="Failed to load breeding herd."
+          onRetry={() => breeding.herd.refetch()}
+        />
+      ) : null}
+      {!breeding.herd.isLoading && !breeding.herd.isError && filtered.length === 0 ? (
+        <EmptyState
+          icon={Dna}
+          title="No breeding cattle"
+          description="Log a mating or add reproductive history when registering animals."
         />
       ) : null}
 
-      <section className="mb-8">
-        <h2 className="mb-3 font-display text-lg font-semibold">Pregnancies</h2>
-        {pregnancies.length === 0 ? (
-          <EmptyState title="No pregnancies" description="Track confirmed pregnancies here." />
-        ) : (
-          <div className="space-y-3">
-            {pregnancies.map((p) => (
-              <div key={p.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-medium">{p.cattle_tag}</p>
-                  <Badge
-                    tone={
-                      p.status === "PREGNANT"
-                        ? "accent"
-                        : p.status === "CALVED"
-                          ? "success"
-                          : "default"
-                    }
-                  >
-                    {p.status}
-                  </Badge>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Expected calving: {p.expected_calving_date || "—"}
-                </p>
-                {p.clinical_notes ? (
-                  <p className="mt-2 text-sm text-muted-foreground">{p.clinical_notes}</p>
-                ) : null}
-                {canConfirm && p.status === "OPEN" ? (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="mt-3"
-                    loading={breeding.updatePregnancy.isPending}
-                    onClick={() =>
-                      breeding.updatePregnancy.mutate({
-                        id: p.id,
-                        payload: { status: "PREGNANT" },
-                      })
-                    }
-                  >
-                    Confirm pregnant
-                  </Button>
-                ) : null}
-              </div>
-            ))}
+      {filtered.length > 0 ? (
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-sm)]">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-base">
+              <thead className="border-b border-border bg-muted/40 text-sm uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="whitespace-nowrap px-4 py-3 font-medium">{t("cattle.tagId")}</th>
+                  <th className="whitespace-nowrap px-4 py-3 font-medium">{t("breeding.pregnancyStatus")}</th>
+                  <th className="whitespace-nowrap px-4 py-3 font-medium">{t("breeding.inseminationDate")}</th>
+                  <th className="whitespace-nowrap px-4 py-3 font-medium">{t("breeding.expectedCalving")}</th>
+                  <th className="whitespace-nowrap px-4 py-3 font-medium">{t("husbandry.taskName")}</th>
+                  <th className="whitespace-nowrap px-4 py-3 font-medium">Focus</th>
+                  <th className="px-4 py-3 font-medium">
+                    <span className="sr-only">Open</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((row) => {
+                  const ev = row.next_event;
+                  return (
+                    <tr
+                      key={row.cattle_id}
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => router.push(`/breeding/${row.cattle_id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          router.push(`/breeding/${row.cattle_id}`);
+                        }
+                      }}
+                      className="cursor-pointer border-b border-border/70 transition-colors last:border-0 hover:bg-muted/35 focus-visible:bg-muted/35 focus-visible:outline-none"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="font-medium">{row.cattle_number}</div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                          {row.name ? (
+                            <span className="text-xs text-muted-foreground">{row.name}</span>
+                          ) : null}
+                          {row.lactation_stage_label ? (
+                            <Badge className="text-[10px]">{row.lactation_stage_label}</Badge>
+                          ) : null}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge tone={pregnancyTone(row.pregnancy_state)}>
+                          {row.pregnancy_state_label}
+                        </Badge>
+                        {row.days_open != null && row.pregnancy_state === "not_pregnant" ? (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {row.days_open}d open
+                          </p>
+                        ) : null}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                        <div>{formatShortDate(row.last_insemination_date)}</div>
+                        {row.breeding_method || row.days_since_insemination != null ? (
+                          <p className="mt-0.5 text-xs">
+                            {[
+                              row.breeding_method,
+                              row.days_since_insemination != null
+                                ? `${row.days_since_insemination}d ago`
+                                : null,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </p>
+                        ) : null}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
+                        {formatShortDate(row.expected_calving_date)}
+                        {row.days_to_calving != null ? (
+                          <p className="mt-0.5 text-xs">
+                            {row.days_to_calving < 0
+                              ? `${Math.abs(row.days_to_calving)}d overdue`
+                              : `in ${row.days_to_calving}d`}
+                          </p>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-3">
+                        {ev ? (
+                          <div>
+                            <p className="font-medium">{ev.title}</p>
+                            <p
+                              className={`text-xs ${
+                                ev.is_overdue ? "text-danger" : "text-muted-foreground"
+                              }`}
+                            >
+                              {formatShortDate(ev.date)} ·{" "}
+                              {formatEventTiming(ev.days_until, ev.is_overdue)}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-xs text-muted-foreground">{row.action_hint}</p>
+                        {canConfirm && row.can_confirm_pregnancy && row.pregnancy_id ? (
+                          <Button
+                            type="button"
+                            className="mt-1 h-8 px-2 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              breeding.updatePregnancy.mutate({
+                                id: row.pregnancy_id!,
+                                payload: { status: "PREGNANT" },
+                              });
+                            }}
+                          >
+                            Confirm
+                          </Button>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-3 text-right text-muted-foreground">
+                        <ChevronRight className="ml-auto h-4 w-4" aria-hidden />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        )}
-      </section>
+        </div>
+      ) : null}
 
-      <section>
-        <h2 className="mb-3 font-display text-lg font-semibold">Mating events</h2>
-        {events.length === 0 ? (
-          <EmptyState title="No mating events" />
-        ) : (
-          <div className="space-y-3">
-            {events.map((e) => (
-              <div key={e.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-                <p className="font-medium">
-                  {e.dam_tag} · {e.method}
-                </p>
-                <p className="text-xs text-muted-foreground">{e.mating_date}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <Modal open={open} onClose={() => setOpen(false)} title="Log mating">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("breeding.recordInsemination")}>
         <Formik
           initialValues={{
             dam: options[0]?.value || "",
@@ -156,7 +292,7 @@ export default function BreedingPage() {
               await breeding.createEvent.mutateAsync({
                 dam: Number(values.dam),
                 mating_date: values.mating_date,
-                method: values.method as "NATURAL" | "AI",
+                method: values.method as "AI" | "NATURAL",
                 notes: values.notes,
               });
               setOpen(false);
@@ -165,18 +301,19 @@ export default function BreedingPage() {
             }
           }}
         >
-          {({ values, handleChange, handleBlur, status }) => (
+          {({ values, errors, touched, handleChange, handleBlur, status }) => (
             <Form className="space-y-4">
               <Select
-                label="Dam"
+                label={t("cattle.motherTag")}
                 name="dam"
                 value={values.dam}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 options={[{ label: "Select…", value: "" }, ...options]}
+                error={touched.dam ? errors.dam : undefined}
               />
               <Input
-                label="Mating date"
+                label={t("breeding.inseminationDate")}
                 name="mating_date"
                 type="date"
                 value={values.mating_date}
@@ -190,12 +327,12 @@ export default function BreedingPage() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 options={[
-                  { label: "Artificial Insemination", value: "AI" },
+                  { label: "AI", value: "AI" },
                   { label: "Natural", value: "NATURAL" },
                 ]}
               />
               <Textarea
-                label="Notes"
+                label={t("cattle.notes")}
                 name="notes"
                 value={values.notes}
                 onChange={handleChange}
@@ -203,7 +340,7 @@ export default function BreedingPage() {
               />
               {status ? <p className="text-sm text-danger">{status}</p> : null}
               <Button type="submit" className="w-full" loading={breeding.createEvent.isPending}>
-                Save
+                {t("common.save")}
               </Button>
             </Form>
           )}

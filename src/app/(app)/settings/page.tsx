@@ -17,6 +17,9 @@ import { staffSchema } from "@/features/auth/validation";
 import { useFarm } from "@/features/farm/hooks/use-farm";
 import { ROLE_LABELS } from "@/lib/auth/access";
 
+import { LanguageSelector } from "@/components/ui/language-selector";
+import { useTranslation } from "@/lib/i18n";
+
 const farmSchema = Yup.object({
   name: Yup.string().required(),
   location: Yup.string(),
@@ -36,6 +39,7 @@ const pricingSchema = Yup.object({
 function SettingsContent() {
   const farm = useFarm();
   const staff = useStaff();
+  const { t } = useTranslation();
 
   if (farm.isLoading) return <LoadingState />;
   if (farm.isError) {
@@ -45,9 +49,23 @@ function SettingsContent() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Settings"
-        description="Farm profile, milk pricing, and staff for your farm."
+        title={t("settings.title")}
+        description={t("settings.subtitle")}
       />
+
+      <Card>
+        <CardHeader>
+          <h2 className="font-display text-lg font-semibold">{t("settings.languagePreference")}</h2>
+          <p className="text-sm text-muted-foreground">
+            {t("settings.selectLanguage")} (English, አማርኛ, Afaan Oromoo).
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="max-w-md">
+            <LanguageSelector variant="full" />
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

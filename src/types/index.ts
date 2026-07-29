@@ -216,6 +216,56 @@ export interface MilkRecord {
   updated_at: string;
 }
 
+export interface MilkHerdRow {
+  cattle_id: number;
+  cattle_number: string;
+  name: string;
+  last_birth_date: string | null;
+  average_milk_production: number;
+  next_estimated_dry_off: string | null;
+  milked_days_current_calving: number | null;
+  lactation_stage: string;
+  lactation_stage_label: string;
+  is_actively_milking: boolean;
+  cycle_total_liters: number;
+  cycle_record_days: number;
+}
+
+export interface MilkHerdOverview {
+  count: number;
+  results: MilkHerdRow[];
+}
+
+export interface MilkCalvingCycle {
+  cycle_index: number | null;
+  is_current: boolean;
+  calving_date: string | null;
+  cycle_end: string;
+  birth_id: number | null;
+  calf_tag_id: string;
+  days_in_milk: number | null;
+  estimated_dry_off: string | null;
+  record_count: number;
+  total_liters: number;
+  average_daily: number;
+  label: string;
+  records: MilkRecord[];
+}
+
+export interface MilkCattleHistory {
+  cattle_id: number;
+  cattle_number: string;
+  name: string;
+  last_birth_date: string | null;
+  average_milk_production: number;
+  next_estimated_dry_off: string | null;
+  milked_days_current_calving: number | null;
+  lactation_stage: string;
+  lactation_stage_label: string;
+  is_actively_milking: boolean;
+  cycles: MilkCalvingCycle[];
+}
+
 export interface HealthRecord {
   id: number;
   cattle: number;
@@ -312,6 +362,92 @@ export interface BirthRecord {
   complications: string;
   notes: string;
   created_at: string;
+}
+
+export interface BreedingNextEvent {
+  type: string;
+  title: string;
+  detail?: string;
+  date: string;
+  days_until: number;
+  is_overdue: boolean;
+  priority?: string;
+  task_id?: number | null;
+}
+
+export interface BreedingHerdRow {
+  cattle_id: number;
+  cattle_number: string;
+  name: string;
+  pregnancy_state: "pregnant" | "unconfirmed" | "not_pregnant";
+  pregnancy_state_label: string;
+  pregnancy_id: number | null;
+  pregnancy_status_raw: string | null;
+  last_insemination_date: string | null;
+  breeding_method: "AI" | "NATURAL" | null;
+  days_since_insemination: number | null;
+  expected_calving_date: string | null;
+  days_to_calving: number | null;
+  last_calving_date: string | null;
+  days_open: number | null;
+  lactation_stage: string;
+  lactation_stage_label: string;
+  next_event: BreedingNextEvent | null;
+  action_hint: string;
+  can_confirm_pregnancy: boolean;
+  can_record_calving: boolean;
+}
+
+export interface BreedingHerdOverview {
+  count: number;
+  results: BreedingHerdRow[];
+}
+
+export interface BreedingUpcomingItem {
+  id: number | null;
+  cattle: number;
+  cattle_number: string;
+  cattle_name?: string;
+  cattle_tag?: string;
+  task_type: string;
+  title: string;
+  event_title?: string;
+  description: string;
+  due_date: string;
+  days_until: number;
+  is_overdue: boolean;
+  priority: string;
+  status: string;
+  pregnancy_state: string;
+  pregnancy_state_label: string;
+  is_derived?: boolean;
+}
+
+export interface BreedingUpcomingBoard {
+  overdue: BreedingUpcomingItem[];
+  due_today: BreedingUpcomingItem[];
+  upcoming: BreedingUpcomingItem[];
+  counts: { overdue: number; due_today: number; upcoming: number };
+  days: number;
+}
+
+export interface BreedingCycle {
+  cycle_index: number | null;
+  is_current: boolean;
+  label: string;
+  outcome: string;
+  mating: BreedingEvent | null;
+  pregnancy: Pregnancy | null;
+  birth: BirthRecord | null;
+  expected_calving_date: string | null;
+  calving_date: string | null;
+}
+
+export interface BreedingCattleHistory extends BreedingHerdRow {
+  cycles: BreedingCycle[];
+  event_count: number;
+  pregnancy_count: number;
+  birth_count: number;
 }
 
 export interface Transaction {

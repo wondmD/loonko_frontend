@@ -23,7 +23,7 @@ export function ModuleTabs({
             key={item.href}
             href={item.href}
             className={cn(
-              "shrink-0 rounded-lg px-3.5 py-2 text-sm font-medium transition",
+              "shrink-0 rounded-lg px-3.5 py-2.5 text-base font-medium transition",
               active
                 ? "bg-card text-foreground shadow-[var(--shadow-sm)]"
                 : "text-muted-foreground hover:text-foreground",

@@ -2,7 +2,10 @@ import { apiClient } from "@/lib/api/client";
 import type {
   Alert,
   BirthRecord,
+  BreedingCattleHistory,
   BreedingEvent,
+  BreedingHerdOverview,
+  BreedingUpcomingBoard,
   Cattle,
   CattleDetail,
   Farm,
@@ -12,6 +15,8 @@ import type {
   HusbandryBoard,
   HusbandryTask,
   LoginResponse,
+  MilkCattleHistory,
+  MilkHerdOverview,
   MilkRecord,
   MilkSummary,
   MilkTrends,
@@ -80,6 +85,9 @@ export const milkApi = {
     apiClient.get<MilkSummary>("/milk/summary/", { params }).then((r) => r.data),
   trends: (params?: { days?: number; group?: string }) =>
     apiClient.get<MilkTrends>("/milk/trends/", { params }).then((r) => r.data),
+  herd: () => apiClient.get<MilkHerdOverview>("/milk/herd/").then((r) => r.data),
+  cattleHistory: (cattleId: number) =>
+    apiClient.get<MilkCattleHistory>(`/milk/herd/${cattleId}/`).then((r) => r.data),
   listFeed: (params?: Record<string, string | number | undefined>) =>
     apiClient
       .get<Paginated<FeedSchedule>>("/milk/feed-schedules/", { params })
@@ -148,6 +156,14 @@ export const breedingApi = {
     apiClient.get<Paginated<BirthRecord>>("/breeding/births/", { params }).then((r) => r.data),
   createBirth: (payload: Partial<BirthRecord>) =>
     apiClient.post<BirthRecord>("/breeding/births/", payload).then((r) => r.data),
+  herd: () =>
+    apiClient.get<BreedingHerdOverview>("/breeding/herd/").then((r) => r.data),
+  upcoming: (params?: { days?: number }) =>
+    apiClient.get<BreedingUpcomingBoard>("/breeding/upcoming/", { params }).then((r) => r.data),
+  cattleHistory: (cattleId: number) =>
+    apiClient
+      .get<BreedingCattleHistory>(`/breeding/herd/${cattleId}/`)
+      .then((r) => r.data),
 };
 
 export const financeApi = {

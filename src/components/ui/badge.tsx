@@ -2,11 +2,11 @@ import { cn } from "@/lib/utils/cn";
 import type { ReactNode } from "react";
 
 const tones = {
-  default: "bg-muted text-muted-foreground ring-1 ring-border/60",
-  success: "bg-success/12 text-success ring-1 ring-success/20",
-  warning: "bg-warning/12 text-warning ring-1 ring-warning/20",
-  danger: "bg-danger/12 text-danger ring-1 ring-danger/20",
-  accent: "bg-accent/12 text-accent ring-1 ring-accent/25",
+  default: "bg-muted/80 text-muted-foreground border border-border/60",
+  success: "bg-success/15 text-success border border-success/30",
+  warning: "bg-warning/15 text-warning border border-warning/30",
+  danger: "bg-danger/15 text-danger border border-danger/30",
+  accent: "bg-accent/15 text-accent border border-accent/30",
 } as const;
 
 export function Badge({
@@ -21,7 +21,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-lg px-2 py-0.5 text-[0.7rem] font-semibold tracking-wide",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-wide transition-colors",
         tones[tone],
         className,
       )}

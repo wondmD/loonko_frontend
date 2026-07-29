@@ -5,6 +5,7 @@ import {
   CalendarClock,
   HeartPulse,
   Milk as MilkIcon,
+  Plus,
   TriangleAlert,
   Wallet,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import {
 } from "recharts";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
@@ -28,8 +30,11 @@ import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { canAccess } from "@/lib/auth/access";
 import { formatLiters, formatMoney } from "@/lib/utils/cn";
 
+import { useTranslation } from "@/lib/i18n";
+
 export default function DashboardPage() {
   const { role, milk, cattle, health, breeding, alerts, finance, husbandry } = useDashboard();
+  const { t } = useTranslation();
 
   const loading =
     milk.summary.isLoading ||
@@ -55,54 +60,54 @@ export default function DashboardPage() {
     })) ?? [];
 
   return (
-    <div>
+    <div className="space-y-6 sm:space-y-8">
       <PageHeader
-        title="Home"
+        title={t("nav.dashboard")}
         description={
           role === "VETERINARIAN"
-            ? "Health overview for the herd."
-            : "Milk, herd status, and care at a glance."
+            ? t("dashboard.vetSubtitle")
+            : t("dashboard.mainSubtitle")
         }
         actions={
           canAccess(role, "milkWrite") ? (
-            <Link
-              href="/milk/new"
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold tracking-tight text-primary-foreground shadow-[var(--shadow-sm)]"
-            >
-              Log today’s milk
+            <Link href="/milk/new">
+              <Button size="md" className="gap-2 shadow-sm">
+                <Plus className="h-4 w-4" />
+                <span>{t("dashboard.logTodayMilk")}</span>
+              </Button>
             </Link>
           ) : null
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard
-          label="Milk today"
+          label={t("dashboard.milkToday")}
           value={formatLiters(milk.summary.data?.total_liters)}
           hint={`${milk.summary.data?.record_count ?? 0} records`}
           icon={MilkIcon}
         />
         <StatCard
-          label="Active herd"
+          label={t("dashboard.activeCattle")}
           value={cattle.list.data?.count ?? cattle.list.data?.results.length ?? 0}
           hint="Cattle marked active"
           icon={HeartPulse}
         />
         <StatCard
-          label="Overdue tasks"
+          label={t("dashboard.overdueTasks")}
           value={husbandry.data?.counts.overdue ?? 0}
           hint="Husbandry board"
           icon={CalendarClock}
         />
         <StatCard
-          label="Open alerts"
+          label={t("dashboard.openAlerts")}
           value={alerts.unread.data?.unread ?? 0}
           hint="Needs attention"
           icon={Bell}
         />
         {role === "OWNER" && finance ? (
           <StatCard
-            label="30-day profit"
+            label={t("dashboard.profit30Days")}
             value={formatMoney(
               finance.summary.data?.profit,
               finance.summary.data?.currency,
@@ -119,7 +124,7 @@ export default function DashboardPage() {
           />
         ) : (
           <StatCard
-            label="Vaccinations due"
+            label={t("dashboard.vaccinationsDue")}
             value={health.upcoming.data?.length ?? 0}
             hint="Next 7 days"
             icon={TriangleAlert}
@@ -127,31 +132,38 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <h2 className="font-display text-lg font-semibold">Milk trend</h2>
-            <p className="text-sm text-muted-foreground">Last 30 days</p>
+            <h2 className="font-display text-lg font-bold">{t("dashboard.milkTrend")}</h2>
+            <p className="text-xs text-muted-foreground">{t("dashboard.last30Days")}</p>
           </CardHeader>
-          <CardContent className="h-72">
+          <CardContent className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="milkFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0.02} />
+                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0.01} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" opacity={0.6} />
+                <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="var(--color-muted-foreground)" />
+                <YAxis tick={{ fontSize: 12 }} stroke="var(--color-muted-foreground)" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "var(--color-card)",
+                    borderColor: "var(--color-border)",
+                    borderRadius: "0.75rem",
+                    boxShadow: "var(--shadow-md)",
+                  }}
+                />
                 <Area
                   type="monotone"
                   dataKey="liters"
                   stroke="var(--color-primary)"
                   fill="url(#milkFill)"
-                  strokeWidth={2}
+                  strokeWidth={2.5}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -160,17 +172,17 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <h2 className="font-display text-lg font-semibold">Care queue</h2>
+            <h2 className="font-display text-lg font-bold">{t("dashboard.careQueue")}</h2>
           </CardHeader>
           <CardContent className="space-y-3">
             {(husbandry.data?.overdue ?? []).slice(0, 3).map((task) => (
               <div
                 key={`h-${task.id}`}
-                className="rounded-xl border border-border bg-muted/40 px-3 py-3"
+                className="rounded-xl border border-border/70 bg-muted/30 px-3.5 py-3 transition-colors hover:border-border"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-medium">{task.cattle_tag}</p>
-                  <Badge tone="danger">Overdue</Badge>
+                  <p className="text-sm font-semibold">{task.cattle_tag}</p>
+                  <Badge tone="danger">{t("dashboard.overdueTasks")}</Badge>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{task.title}</p>
               </div>
@@ -178,10 +190,10 @@ export default function DashboardPage() {
             {(health.upcoming.data ?? []).slice(0, 3).map((item) => (
               <div
                 key={item.id}
-                className="rounded-xl border border-border bg-muted/40 px-3 py-3"
+                className="rounded-xl border border-border/70 bg-muted/30 px-3.5 py-3 transition-colors hover:border-border"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-medium">{item.cattle_tag}</p>
+                  <p className="text-sm font-semibold">{item.cattle_tag}</p>
                   <Badge tone="warning">{item.next_due_on}</Badge>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{item.vaccine_name}</p>
@@ -189,12 +201,12 @@ export default function DashboardPage() {
             ))}
             {(husbandry.data?.overdue ?? []).length === 0 &&
             (health.upcoming.data ?? []).length === 0 ? (
-              <p className="text-sm text-muted-foreground">No overdue tasks or vaccinations due soon.</p>
+              <p className="py-4 text-center text-sm text-muted-foreground">{t("dashboard.noTasksDue")}</p>
             ) : null}
-            <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
-              <span>Pregnancies tracked: {breeding.pregnancies.data?.count ?? 0}</span>
-              <Link href="/husbandry" className="font-medium text-foreground underline-offset-2 hover:underline">
-                View tasks
+            <div className="flex items-center justify-between pt-3 text-xs text-muted-foreground border-t border-border/40">
+              <span>{t("dashboard.pregnanciesTracked")}: {breeding.pregnancies.data?.count ?? 0}</span>
+              <Link href="/husbandry" className="font-semibold text-primary underline-offset-2 hover:underline">
+                {t("common.view")}
               </Link>
             </div>
           </CardContent>

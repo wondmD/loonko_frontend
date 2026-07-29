@@ -23,6 +23,9 @@ import { canAccess } from "@/lib/auth/access";
 import { formatLiters } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/auth-store";
 
+import { useTranslation } from "@/lib/i18n";
+import { formatRelativeDays, translateDynamicText } from "@/lib/i18n/translate-dynamic";
+
 export default function CattleDetailPage({
   params,
 }: {
@@ -35,6 +38,7 @@ export default function CattleDetailPage({
   const canEditProfile = role === "OWNER";
   const { data, isLoading, isError, refetch } = useCattleDetail(cattleId);
   const { update } = useCattle();
+  const { language, t } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [photoDrafts, setPhotoDrafts] = useState<{
@@ -56,35 +60,24 @@ export default function CattleDetailPage({
   const ageLabel =
     data.age_days == null
       ? "—"
-      : data.age_days < 365
-        ? `${data.age_days} days`
-        : `${(data.age_days / 365).toFixed(1)} years`;
+      : data.age_days < 60
+        ? `${data.age_days}d`
+        : `${(data.age_days / 30.4).toFixed(0)} mo`;
 
   const animalClass = data.husbandry_plan?.animal_class || data.life_stage;
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Animal profile"
         title={data.tag_id}
-        description={data.name || "Cattle profile"}
+        description={data.name || t("cattleDetail.eyebrow")}
         actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge tone={data.status === "ACTIVE" ? "success" : "default"}>{data.status}</Badge>
-            {data.sex === "MALE" ? <Badge>Male</Badge> : null}
-            <Badge tone="accent">
-              {animalClass?.category_label || animalClass?.category || "—"}
-            </Badge>
-            <Badge tone={data.lactation.is_pregnant ? "accent" : "default"}>
-              {animalClass?.label || data.lactation.stage_label}
-            </Badge>
-            {canEditProfile ? (
-              <Button variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
-                <Pencil className="h-3.5 w-3.5" />
-                Edit
-              </Button>
-            ) : null}
-          </div>
+          canEditProfile ? (
+            <Button variant="secondary" onClick={() => setEditOpen(true)}>
+              <Pencil className="h-4 w-4" />
+              {t("common.edit")}
+            </Button>
+          ) : null
         }
       />
 
@@ -100,9 +93,9 @@ export default function CattleDetailPage({
       <div className="grid gap-4 sm:grid-cols-3">
         {(
           [
-            ["Front", data.photo_front_url],
-            ["Left side", data.photo_left_url],
-            ["Right side", data.photo_right_url],
+            [t("cattleDetail.frontPhoto"), data.photo_front_url],
+            [t("cattleDetail.leftPhoto"), data.photo_left_url],
+            [t("cattleDetail.rightPhoto"), data.photo_right_url],
           ] as const
         ).map(([label, src]) => (
           <Card key={label} className="overflow-hidden">
@@ -122,18 +115,18 @@ export default function CattleDetailPage({
       {canWrite ? (
         <Card>
           <CardHeader>
-            <h2 className="font-display text-lg font-semibold">Update identification photos</h2>
+            <h2 className="font-display text-lg font-semibold">{t("cattleDetail.updatePhotosTitle")}</h2>
             <p className="text-sm text-muted-foreground">
-              Replace any view. Upload only the sides you want to change.
+              {t("cattleDetail.updatePhotosDesc")}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-3">
               {(
                 [
-                  ["photo_front", "Front"],
-                  ["photo_left", "Left side"],
-                  ["photo_right", "Right side"],
+                  ["photo_front", t("cattleDetail.frontPhoto")],
+                  ["photo_left", t("cattleDetail.leftPhoto")],
+                  ["photo_right", t("cattleDetail.rightPhoto")],
                 ] as const
               ).map(([key, label]) => (
                 <PhotoUploadField
@@ -172,7 +165,7 @@ export default function CattleDetailPage({
                   setStatusMsg(null);
                   const form = buildCattleFormData({}, photoDrafts);
                   await update.mutateAsync({ id: cattleId, payload: form });
-                  setStatusMsg("Photos updated");
+                  setStatusMsg(t("cattleDetail.photosUpdated"));
                   setPhotoDrafts({
                     photo_front: null,
                     photo_left: null,
@@ -184,7 +177,7 @@ export default function CattleDetailPage({
                 }
               }}
             >
-              Save photos
+              {t("cattleDetail.savePhotos")}
             </Button>
             {statusMsg ? <p className="text-sm text-muted-foreground">{statusMsg}</p> : null}
           </CardContent>
@@ -192,26 +185,26 @@ export default function CattleDetailPage({
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Age" value={ageLabel} />
+        <StatCard label={t("cattleDetail.age")} value={ageLabel} />
         <StatCard
-          label="Class"
-          value={animalClass?.category_label || "—"}
-          hint={animalClass?.label}
+          label={t("cattleDetail.class")}
+          value={translateDynamicText(animalClass?.category_label || animalClass?.category || "—", language)}
+          hint={translateDynamicText(animalClass?.label, language)}
         />
         <StatCard
-          label="Lactation"
-          value={data.lactation.stage}
+          label={t("cattleDetail.lactation")}
+          value={translateDynamicText(data.lactation.stage, language)}
           hint={
             data.lactation.days_in_milk != null
-              ? `${data.lactation.days_in_milk} days in milk`
-              : data.lactation.stage_label
+              ? `${data.lactation.days_in_milk} ${t("milkDetail.dimAbbr")}`
+              : translateDynamicText(data.lactation.stage_label, language)
           }
           icon={Droplets}
         />
         <StatCard
-          label="30-day milk"
+          label={t("cattleDetail.milk30Days")}
           value={formatLiters(data.milk_summary.last_30_days_liters)}
-          hint={`Avg ${Number(data.milk_summary.average_daily_30).toFixed(1)} L / record`}
+          hint={`Avg ${Number(data.milk_summary.average_daily_30).toFixed(1)} ${t("milk.litersAbbr")}`}
           icon={Droplets}
         />
       </div>
@@ -223,20 +216,20 @@ export default function CattleDetailPage({
           <CardHeader>
             <div className="flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-primary" />
-              <h2 className="font-display text-lg font-semibold">Husbandry schedule</h2>
+              <h2 className="font-display text-lg font-semibold">{t("cattleDetail.husbandrySchedule")}</h2>
             </div>
             <p className="text-sm text-muted-foreground">
-              Auto-generated dairy lifecycle tasks for this female.
+              {t("cattleDetail.husbandryScheduleDesc")}
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
             {data.sex !== "FEMALE" ? (
               <EmptyState
-                title="Male animal"
-                description="Husbandry automation focuses on female dairy cattle."
+                title={t("cattleDetail.maleAnimal")}
+                description={t("cattleDetail.maleAnimalDesc")}
               />
             ) : (data.husbandry_tasks ?? []).length === 0 ? (
-              <EmptyState title="No pending husbandry tasks" />
+              <EmptyState title={t("cattleDetail.noTasks")} />
             ) : (
               data.husbandry_tasks.map((task) => (
                 <HusbandryTaskRow key={task.id} task={task} showCattle={false} />
@@ -249,12 +242,12 @@ export default function CattleDetailPage({
           <CardHeader>
             <div className="flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-primary" />
-              <h2 className="font-display text-lg font-semibold">Upcoming events</h2>
+              <h2 className="font-display text-lg font-semibold">{t("cattleDetail.upcomingEvents")}</h2>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             {data.upcoming_events.length === 0 ? (
-              <EmptyState title="No upcoming events" />
+              <EmptyState title={t("cattleDetail.noEvents")} />
             ) : (
               data.upcoming_events.map((event) => (
                 <div
@@ -263,19 +256,17 @@ export default function CattleDetailPage({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-medium">{event.title}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{event.description}</p>
+                      <p className="font-medium">{translateDynamicText(event.title, language)}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {translateDynamicText(event.description, language)}
+                      </p>
                     </div>
                     <Badge tone={event.days_until <= 7 ? "warning" : "default"}>
                       {event.date}
                     </Badge>
                   </div>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    {event.days_until === 0
-                      ? "Today"
-                      : event.days_until > 0
-                        ? `In ${event.days_until} days`
-                        : `${Math.abs(event.days_until)} days overdue`}
+                    {formatRelativeDays(event.days_until, language)}
                   </p>
                 </div>
               ))
@@ -286,21 +277,21 @@ export default function CattleDetailPage({
 
       <Card>
         <CardHeader>
-          <h2 className="font-display text-lg font-semibold">Profile details</h2>
+          <h2 className="font-display text-lg font-semibold">{t("cattleDetail.profileDetails")}</h2>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Info label="Name" value={data.name || "—"} />
-          <Info label="Breed" value={data.breed || "—"} />
-          {data.sex === "MALE" ? <Info label="Gender" value="Male" /> : null}
-          <Info label="Life stage" value={data.life_stage?.label || "—"} />
-          <Info label="Date of birth" value={data.date_of_birth || "—"} />
-          <Info label="Last calving" value={data.lactation.last_calving_date || "—"} />
+          <Info label={t("common.name")} value={data.name || "—"} />
+          <Info label={t("cattle.breed")} value={data.breed || "—"} />
+          {data.sex === "MALE" ? <Info label={t("cattleDetail.gender")} value={t("cattle.male")} /> : null}
+          <Info label={t("cattleDetail.lifeStage")} value={data.life_stage?.label || "—"} />
+          <Info label={t("cattle.dob")} value={data.date_of_birth || "—"} />
+          <Info label={t("cattleDetail.lastCalving")} value={data.lactation.last_calving_date || "—"} />
           <Info
-            label="Pregnancy"
-            value={data.lactation.is_pregnant ? "Pregnant" : "Open / not pregnant"}
+            label={t("breeding.pregnancyStatus")}
+            value={data.lactation.is_pregnant ? t("breeding.confirmed") : t("breeding.unconfirmed")}
           />
           <div className="sm:col-span-2">
-            <Info label="Notes" value={data.notes || "—"} />
+            <Info label={t("cattle.notes")} value={data.notes || "—"} />
           </div>
         </CardContent>
       </Card>
@@ -309,12 +300,12 @@ export default function CattleDetailPage({
         <CardHeader>
           <div className="flex items-center gap-2">
             <Droplets className="h-4 w-4 text-primary" />
-            <h2 className="font-display text-lg font-semibold">Milk production summary</h2>
+            <h2 className="font-display text-lg font-semibold">{t("cattleDetail.milkSummary")}</h2>
           </div>
         </CardHeader>
         <CardContent>
           {(data.recent_milk ?? []).length === 0 ? (
-            <EmptyState title="No milk records" description="Log yields from the Milk module." />
+            <EmptyState title={t("cattleDetail.noMilkRecords")} description={t("cattleDetail.logYieldsHint")} />
           ) : (
             <div className="space-y-2">
               {data.recent_milk.map((row) => (
@@ -335,13 +326,13 @@ export default function CattleDetailPage({
         <CardHeader>
           <div className="flex items-center gap-2">
             <History className="h-4 w-4 text-primary" />
-            <h2 className="font-display text-lg font-semibold">Breeding history</h2>
+            <h2 className="font-display text-lg font-semibold">{t("cattleDetail.breedingHistory")}</h2>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Section title="Pregnancies">
+          <Section title={t("cattleDetail.pregnancies")}>
             {data.breeding_history.pregnancies.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No pregnancies recorded.</p>
+              <p className="text-sm text-muted-foreground">{t("cattleDetail.noPregnancies")}</p>
             ) : (
               data.breeding_history.pregnancies.map((p) => (
                 <div
@@ -350,16 +341,16 @@ export default function CattleDetailPage({
                 >
                   <span>
                     {p.status}
-                    {p.expected_calving_date ? ` · due ${p.expected_calving_date}` : ""}
+                    {p.expected_calving_date ? ` · ${t("cattleDetail.due")} ${p.expected_calving_date}` : ""}
                   </span>
                   <Badge>{p.status}</Badge>
                 </div>
               ))
             )}
           </Section>
-          <Section title="Mating / AI events">
+          <Section title={t("cattleDetail.matingEvents")}>
             {data.breeding_history.events.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No breeding events.</p>
+              <p className="text-sm text-muted-foreground">{t("cattleDetail.noMatingEvents")}</p>
             ) : (
               data.breeding_history.events.map((e) => (
                 <div
@@ -371,17 +362,17 @@ export default function CattleDetailPage({
               ))
             )}
           </Section>
-          <Section title="Births">
+          <Section title={t("cattleDetail.births")}>
             {data.breeding_history.births.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No birth records.</p>
+              <p className="text-sm text-muted-foreground">{t("cattleDetail.noBirths")}</p>
             ) : (
               data.breeding_history.births.map((b) => (
                 <div
                   key={b.id}
                   className="rounded-xl border border-border px-3 py-2 text-sm"
                 >
-                  Calved {b.calving_date}
-                  {b.calf_tag_id ? ` · calf ${b.calf_tag_id}` : ""}
+                  {t("cattleDetail.calved")} {b.calving_date}
+                  {b.calf_tag_id ? ` · ${t("cattleDetail.calf")} ${b.calf_tag_id}` : ""}
                 </div>
               ))
             )}
@@ -393,12 +384,12 @@ export default function CattleDetailPage({
         <CardHeader>
           <div className="flex items-center gap-2">
             <HeartPulse className="h-4 w-4 text-primary" />
-            <h2 className="font-display text-lg font-semibold">Alerts for this cattle</h2>
+            <h2 className="font-display text-lg font-semibold">{t("cattleDetail.cattleAlerts")}</h2>
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
           {data.alerts.length === 0 ? (
-            <EmptyState title="No alerts" description="Nothing flagged for this animal." />
+            <EmptyState title={t("cattleDetail.noAlerts")} description={t("cattleDetail.noAlertsHint")} />
           ) : (
             data.alerts.map((alert) => (
               <div key={alert.id} className="rounded-2xl border border-border px-4 py-3">

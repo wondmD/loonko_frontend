@@ -6,23 +6,29 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { LanguageSelector } from "@/components/ui/language-selector";
 import { getMutationError, useAuth } from "@/features/auth/hooks/use-auth";
 import { registerSchema } from "@/features/auth/validation";
+import { useTranslation } from "@/lib/i18n";
 
 export default function RegisterPage() {
   const { register, registerPending } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <Card className="border-white/10 bg-card/95 shadow-[var(--shadow-md)] backdrop-blur">
       <CardHeader>
-        <p className="text-[11px] font-semibold tracking-[0.16em] text-secondary uppercase">
-          Setup
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[11px] font-semibold tracking-[0.16em] text-secondary uppercase">
+            {t("auth.signUp")}
+          </p>
+          <LanguageSelector variant="header" />
+        </div>
         <h1 className="mt-2 font-display text-3xl font-extrabold tracking-tight">
-          Create your farm
+          {t("auth.registerTitle")}
         </h1>
         <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-          Create your farm and owner account to start tracking herd, milk, and care.
+          {t("auth.registerSubtitle")}
         </p>
       </CardHeader>
       <CardContent>
@@ -53,7 +59,7 @@ export default function RegisterPage() {
           {({ values, errors, touched, handleChange, handleBlur, status }) => (
             <Form className="space-y-4">
               <Input
-                label="Farm name"
+                label={t("auth.farmName")}
                 name="farm_name"
                 value={values.farm_name}
                 onChange={handleChange}
@@ -79,7 +85,7 @@ export default function RegisterPage() {
                 />
               </div>
               <Input
-                label="Email"
+                label={t("auth.email")}
                 name="email"
                 type="email"
                 value={values.email}
@@ -88,7 +94,7 @@ export default function RegisterPage() {
                 error={touched.email ? errors.email : undefined}
               />
               <Input
-                label="Phone"
+                label={t("auth.phone")}
                 name="phone"
                 value={values.phone}
                 onChange={handleChange}
@@ -96,7 +102,7 @@ export default function RegisterPage() {
                 error={touched.phone ? errors.phone : undefined}
               />
               <Input
-                label="Password"
+                label={t("auth.password")}
                 name="password"
                 type="password"
                 value={values.password}
@@ -106,15 +112,15 @@ export default function RegisterPage() {
               />
               {status ? <p className="text-sm text-danger">{status}</p> : null}
               <Button type="submit" className="w-full" loading={registerPending}>
-                Create account
+                {t("auth.signUp")}
               </Button>
             </Form>
           )}
         </Formik>
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Already set up?{" "}
+          {t("auth.hasAccount")}{" "}
           <Link href="/login" className="font-medium text-primary">
-            Sign in
+            {t("auth.signIn")}
           </Link>
         </p>
       </CardContent>

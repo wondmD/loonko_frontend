@@ -28,8 +28,11 @@ const recordSchema = Yup.object({
   notes: Yup.string(),
 });
 
+import { useTranslation } from "@/lib/i18n";
+
 export default function HealthPage() {
   const role = useAuthStore((s) => s.user?.role);
+  const { t } = useTranslation();
   const canWrite = canAccess(role, "healthWrite");
   const [open, setOpen] = useState(false);
   const health = useHealth();
@@ -44,13 +47,13 @@ export default function HealthPage() {
   return (
     <div>
       <PageHeader
-        title="Health"
-        description="Clinical logs and severity tracking."
+        title={t("health.title")}
+        description={t("health.subtitle")}
         actions={
           canWrite ? (
             <Button onClick={() => setOpen(true)}>
               <Plus className="h-4 w-4" />
-              Log health
+              {t("health.recordHealth")}
             </Button>
           ) : null
         }
@@ -58,9 +61,9 @@ export default function HealthPage() {
 
       <ModuleTabs
         items={[
-          { href: "/health", label: "Records", exact: true },
-          { href: "/health/vaccinations", label: "Vaccinations" },
-          { href: "/health/treatments", label: "Treatments" },
+          { href: "/health", label: t("health.treatmentLogs"), exact: true },
+          { href: "/health/vaccinations", label: t("health.vaccinations") },
+          { href: "/health/treatments", label: t("health.recordNewTreatment") },
         ]}
       />
 
@@ -72,7 +75,7 @@ export default function HealthPage() {
         />
       ) : null}
       {!health.records.isLoading && rows.length === 0 ? (
-        <EmptyState title="No health records" description="Log symptoms and observations here." />
+        <EmptyState title={t("health.noRecords")} description="Log symptoms and observations here." />
       ) : null}
 
       <div className="space-y-3">
@@ -102,7 +105,7 @@ export default function HealthPage() {
         ))}
       </div>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Health log">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("health.recordHealth")}>
         <Formik
           initialValues={{
             cattle: options[0]?.value || "",
@@ -133,7 +136,7 @@ export default function HealthPage() {
           {({ values, handleChange, handleBlur, status }) => (
             <Form className="space-y-4">
               <Select
-                label="Cattle"
+                label={t("cattle.title")}
                 name="cattle"
                 value={values.cattle}
                 onChange={handleChange}
@@ -149,7 +152,7 @@ export default function HealthPage() {
                 onBlur={handleBlur}
               />
               <Input
-                label="Symptoms (comma-separated)"
+                label={t("health.symptoms")}
                 name="symptoms"
                 value={values.symptoms}
                 onChange={handleChange}
@@ -169,7 +172,7 @@ export default function HealthPage() {
                 ]}
               />
               <Textarea
-                label="Notes"
+                label={t("cattle.notes")}
                 name="notes"
                 value={values.notes}
                 onChange={handleChange}
@@ -177,7 +180,7 @@ export default function HealthPage() {
               />
               {status ? <p className="text-sm text-danger">{status}</p> : null}
               <Button type="submit" className="w-full" loading={health.createRecord.isPending}>
-                Save
+                {t("common.save")}
               </Button>
             </Form>
           )}

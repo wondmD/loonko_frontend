@@ -9,8 +9,11 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 import { useAlerts } from "@/features/alerts/hooks/use-alerts";
 import { useAuthStore } from "@/stores/auth-store";
 
+import { useTranslation } from "@/lib/i18n";
+
 export default function AlertsPage() {
   const role = useAuthStore((s) => s.user?.role);
+  const { t } = useTranslation();
   const alerts = useAlerts();
   const rows = alerts.list.data?.results ?? [];
   const isOwner = role === "OWNER";
@@ -18,8 +21,8 @@ export default function AlertsPage() {
   return (
     <div>
       <PageHeader
-        title="Alerts"
-        description="Vaccination due dates, low milk, and breeding reminders."
+        title={t("alerts.title")}
+        description={t("alerts.subtitle")}
         actions={
           isOwner ? (
             <Button
@@ -28,7 +31,7 @@ export default function AlertsPage() {
               onClick={() => alerts.generate.mutate()}
             >
               <RefreshCw className="h-4 w-4" />
-              Refresh due alerts
+              {t("alerts.refreshAlerts")}
             </Button>
           ) : null
         }
@@ -47,7 +50,7 @@ export default function AlertsPage() {
         <ErrorState message="Failed to load alerts." onRetry={() => alerts.list.refetch()} />
       ) : null}
       {!alerts.list.isLoading && rows.length === 0 ? (
-        <EmptyState icon={Bell} title="All clear" description="No alerts in your inbox." />
+        <EmptyState icon={Bell} title={t("alerts.noAlerts")} description="No alerts in your inbox." />
       ) : null}
 
       <div className="space-y-3">
@@ -86,7 +89,7 @@ export default function AlertsPage() {
                     variant="secondary"
                     onClick={() => alerts.markRead.mutate(alert.id)}
                   >
-                    Mark read
+                    {t("alerts.markAsRead")}
                   </Button>
                 ) : null}
                 <Button
@@ -94,7 +97,7 @@ export default function AlertsPage() {
                   variant="ghost"
                   onClick={() => alerts.acknowledge.mutate(alert.id)}
                 >
-                  Acknowledge
+                  {t("alerts.acknowledge")}
                 </Button>
               </div>
             </div>

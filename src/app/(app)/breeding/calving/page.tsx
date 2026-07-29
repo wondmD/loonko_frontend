@@ -15,7 +15,9 @@ import { Select } from "@/components/ui/select";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 import { Textarea } from "@/components/ui/textarea";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
+import { BREEDING_TABS } from "@/features/breeding/breeding-tabs";
 import { useBreeding } from "@/features/breeding/hooks/use-breeding";
+import { useTranslation } from "@/lib/i18n";
 import { useAuthStore } from "@/stores/auth-store";
 
 const schema = Yup.object({
@@ -27,14 +29,10 @@ const schema = Yup.object({
   notes: Yup.string(),
 });
 
-const BREEDING_TABS = [
-  { href: "/breeding", label: "Mating", exact: true },
-  { href: "/breeding/calving", label: "Calving" },
-];
-
 export default function CalvingPage() {
   const role = useAuthStore((s) => s.user?.role);
   const canWrite = role === "OWNER" || role === "WORKER";
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const breeding = useBreeding();
 
@@ -59,13 +57,13 @@ export default function CalvingPage() {
   return (
     <div>
       <PageHeader
-        title="Calving"
-        description="Record births, register calves, and review calving history."
+        title={t("calvingPage.title")}
+        description={t("calvingPage.description")}
         actions={
           canWrite ? (
             <Button onClick={() => setOpen(true)} disabled={duePregnancies.length === 0}>
               <Plus className="h-4 w-4" />
-              Record calving
+              {t("calvingPage.recordCalving")}
             </Button>
           ) : null
         }
@@ -82,12 +80,12 @@ export default function CalvingPage() {
       ) : null}
 
       <section className="mb-8">
-        <h2 className="mb-3 font-display text-lg font-semibold">Due / open pregnancies</h2>
+        <h2 className="mb-3 font-display text-lg font-semibold">{t("calvingPage.duePregnancies")}</h2>
         {duePregnancies.length === 0 ? (
           <EmptyState
             icon={Baby}
-            title="No pregnancies ready"
-            description="Log mating or confirm pregnancy on Breeding, then record calving here."
+            title={t("calvingPage.noPregnanciesReady")}
+            description={t("calvingPage.noPregnanciesReadyHint")}
           />
         ) : (
           <div className="space-y-3">
@@ -111,7 +109,7 @@ export default function CalvingPage() {
                       variant="secondary"
                       onClick={() => setOpen(true)}
                     >
-                      Record calving
+                      {t("calvingPage.recordCalving")}
                     </Button>
                   ) : null}
                 </div>
@@ -122,9 +120,9 @@ export default function CalvingPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 font-display text-lg font-semibold">Calving history</h2>
+        <h2 className="mb-3 font-display text-lg font-semibold">{t("calvingPage.calvingHistory")}</h2>
         {births.length === 0 ? (
-          <EmptyState title="No calvings recorded yet" />
+          <EmptyState title={t("calvingPage.noCalvingsYet")} />
         ) : (
           <div className="space-y-3">
             {births.map((b) => (
@@ -135,7 +133,7 @@ export default function CalvingPage() {
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {b.calf_tag_id
-                    ? `Calf ${b.calf_tag_id}${b.calf_sex ? ` · ${b.calf_sex}` : ""}`
+                    ? `${t("cattleDetail.calf")} ${b.calf_tag_id}${b.calf_sex ? ` · ${b.calf_sex}` : ""}`
                     : "No calf registered on this record"}
                 </p>
                 {b.complications ? (
@@ -148,7 +146,7 @@ export default function CalvingPage() {
         )}
       </section>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Record calving">
+      <Modal open={open} onClose={() => setOpen(false)} title={t("calvingPage.recordCalving")}>
         <Formik
           initialValues={{
             pregnancy: pregnancyOptions[0]?.value || "",
@@ -179,15 +177,15 @@ export default function CalvingPage() {
           {({ values, handleChange, handleBlur, status }) => (
             <Form className="space-y-4">
               <Select
-                label="Dam pregnancy"
+                label={t("calvingPage.damPregnancy")}
                 name="pregnancy"
                 value={values.pregnancy}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                options={[{ label: "Select…", value: "" }, ...pregnancyOptions]}
+                options={[{ label: `${t("common.select")}…`, value: "" }, ...pregnancyOptions]}
               />
               <Input
-                label="Calving date"
+                label={t("calvingPage.calvingDate")}
                 name="calving_date"
                 type="date"
                 value={values.calving_date}
@@ -195,12 +193,12 @@ export default function CalvingPage() {
                 onBlur={handleBlur}
               />
               <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-3">
-                <p className="text-sm font-medium">New calf (optional)</p>
+                <p className="text-sm font-medium">{t("calvingPage.newCalfOptional")}</p>
                 <p className="text-xs text-muted-foreground">
-                  If you enter a calf tag, Loonkoo creates the calf and links it to the dam.
+                  {t("calvingPage.newCalfHint")}
                 </p>
                 <Input
-                  label="Calf tag ID"
+                  label={t("calvingPage.calfTagId")}
                   name="calf_tag_id"
                   value={values.calf_tag_id}
                   onChange={handleChange}
@@ -209,20 +207,20 @@ export default function CalvingPage() {
                 />
                 {values.calf_tag_id ? (
                   <Select
-                    label="Calf gender"
+                    label={t("calvingPage.calfGender")}
                     name="calf_sex"
                     value={values.calf_sex}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     options={[
-                      { label: "Female", value: "FEMALE" },
-                      { label: "Male", value: "MALE" },
+                      { label: t("cattle.female"), value: "FEMALE" },
+                      { label: t("cattle.male"), value: "MALE" },
                     ]}
                   />
                 ) : null}
               </div>
               <Textarea
-                label="Complications"
+                label={t("calvingPage.complications")}
                 name="complications"
                 value={values.complications}
                 onChange={handleChange}
@@ -230,7 +228,7 @@ export default function CalvingPage() {
                 placeholder="Assisted birth, retained placenta…"
               />
               <Textarea
-                label="Notes"
+                label={t("cattle.notes")}
                 name="notes"
                 value={values.notes}
                 onChange={handleChange}
@@ -238,7 +236,7 @@ export default function CalvingPage() {
               />
               {status ? <p className="text-sm text-danger">{status}</p> : null}
               <Button type="submit" className="w-full" loading={breeding.createBirth.isPending}>
-                Save calving
+                {t("common.save")}
               </Button>
             </Form>
           )}

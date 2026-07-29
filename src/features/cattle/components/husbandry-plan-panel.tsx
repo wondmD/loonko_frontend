@@ -3,6 +3,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/states";
+import { useTranslation } from "@/lib/i18n";
+import { translateDynamicText } from "@/lib/i18n/translate-dynamic";
 import type { HusbandryPlan, HusbandryWindow } from "@/types";
 
 function toneForStatus(status: string) {
@@ -19,14 +21,29 @@ function toneForSeverity(severity: string | null | undefined) {
 }
 
 function WindowRow({ window }: { window: HusbandryWindow }) {
+  const { language, t } = useTranslation();
+
+  const statusLabel =
+    window.status === "OVERDUE"
+      ? t("husbandryPlan.overdue")
+      : window.status === "ACTIVE"
+        ? t("husbandryPlan.active")
+        : window.status === "UPCOMING"
+          ? t("husbandryPlan.upcoming")
+          : window.status;
+
   return (
     <div className="rounded-xl border border-border/80 bg-muted/25 px-3.5 py-3">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="font-semibold tracking-tight">{window.title}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">{window.description}</p>
+          <p className="font-semibold tracking-tight">
+            {translateDynamicText(window.title, language)}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {translateDynamicText(window.description, language)}
+          </p>
         </div>
-        <Badge tone={toneForStatus(window.status)}>{window.status}</Badge>
+        <Badge tone={toneForStatus(window.status)}>{statusLabel}</Badge>
       </div>
       {window.start && window.end ? (
         <p className="mt-2 text-sm">
@@ -34,18 +51,30 @@ function WindowRow({ window }: { window: HusbandryWindow }) {
           <span className="text-muted-foreground"> → </span>
           <span className="font-medium">{window.end}</span>
           {window.ideal ? (
-            <span className="text-muted-foreground"> · ideal {window.ideal}</span>
+            <span className="text-muted-foreground">
+              {" "}
+              · {t("husbandryPlan.ideal")} {window.ideal}
+            </span>
           ) : null}
         </p>
       ) : null}
-      <p className="mt-1 text-xs text-muted-foreground">{window.message}</p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {translateDynamicText(window.message, language)}
+      </p>
     </div>
   );
 }
 
 export function HusbandryPlanPanel({ plan }: { plan?: HusbandryPlan | null }) {
+  const { language, t } = useTranslation();
+
   if (!plan) {
-    return <EmptyState title="No husbandry plan" description="Not enough data yet." />;
+    return (
+      <EmptyState
+        title={t("husbandryPlan.noHusbandryPlan")}
+        description={t("husbandryPlan.noHusbandryPlanHint")}
+      />
+    );
   }
 
   const cls = plan.animal_class;
@@ -54,32 +83,36 @@ export function HusbandryPlanPanel({ plan }: { plan?: HusbandryPlan | null }) {
     <div className="space-y-4">
       <div className="rounded-[1.15rem] border border-border bg-card p-4 shadow-[var(--shadow-sm)]">
         <p className="text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-          Auto-detected class
+          {t("husbandryPlan.autoDetectedClass")}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Badge tone="accent">{cls.category_label || cls.category || "—"}</Badge>
-          <Badge>{cls.label}</Badge>
+          <Badge tone="accent">
+            {translateDynamicText(cls.category_label || cls.category || "—", language)}
+          </Badge>
+          <Badge>{translateDynamicText(cls.label, language)}</Badge>
         </div>
-        <p className="mt-2 text-sm text-muted-foreground">{cls.basis}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {translateDynamicText(cls.basis, language)}
+        </p>
         <div className="mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
           <p>
-            Age:{" "}
+            {t("husbandryPlan.age")}:{" "}
             <span className="font-medium text-foreground">
               {cls.age_days != null
                 ? `${cls.age_days}d${cls.age_months != null ? ` (~${cls.age_months} mo)` : ""}`
-                : "unknown"}
+                : t("husbandryPlan.unknown")}
             </span>
           </p>
           <p>
-            Last calved:{" "}
+            {t("husbandryPlan.lastCalved")}:{" "}
             <span className="font-medium text-foreground">
-              {cls.last_calving_date || "never"}
+              {cls.last_calving_date || t("husbandryPlan.never")}
             </span>
           </p>
           <p>
-            Last AI:{" "}
+            {t("husbandryPlan.lastAi")}:{" "}
             <span className="font-medium text-foreground">
-              {cls.last_insemination_date || "none"}
+              {cls.last_insemination_date || t("husbandryPlan.none")}
             </span>
           </p>
         </div>
@@ -88,19 +121,26 @@ export function HusbandryPlanPanel({ plan }: { plan?: HusbandryPlan | null }) {
       {plan.warnings.length > 0 ? (
         <Card>
           <CardHeader>
-            <h3 className="font-display text-base font-bold">Needs attention</h3>
+            <h3 className="font-display text-base font-bold">{t("husbandryPlan.needsAttention")}</h3>
           </CardHeader>
           <CardContent className="space-y-2">
             {plan.warnings.map((w) => (
-              <div
-                key={w.code}
-                className="rounded-xl border border-border px-3 py-2.5"
-              >
+              <div key={w.code} className="rounded-xl border border-border px-3 py-2.5">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold">{w.title}</p>
-                  <Badge tone={toneForSeverity(w.severity)}>{w.severity}</Badge>
+                  <p className="text-sm font-semibold">
+                    {translateDynamicText(w.title, language)}
+                  </p>
+                  <Badge tone={toneForSeverity(w.severity)}>
+                    {w.severity === "CRITICAL"
+                      ? t("husbandryPlan.critical")
+                      : w.severity === "WARNING"
+                        ? t("husbandryPlan.warning")
+                        : w.severity}
+                  </Badge>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{w.message}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {translateDynamicText(w.message, language)}
+                </p>
               </div>
             ))}
           </CardContent>
@@ -109,15 +149,17 @@ export function HusbandryPlanPanel({ plan }: { plan?: HusbandryPlan | null }) {
 
       <Card>
         <CardHeader>
-          <h3 className="font-display text-base font-bold">Suggested day ranges</h3>
+          <h3 className="font-display text-base font-bold">{t("husbandryPlan.suggestedDayRanges")}</h3>
           <p className="text-sm text-muted-foreground">
-            Insemination, pregnancy check, dry-off, calving, and related windows from age and
-            breeding history.
+            {t("husbandryPlan.suggestedDayRangesDesc")}
           </p>
         </CardHeader>
         <CardContent className="space-y-3">
           {plan.windows.length === 0 ? (
-            <EmptyState title="No windows yet" description="Add DOB or breeding records." />
+            <EmptyState
+              title={t("husbandryPlan.noWindowsYet")}
+              description={t("husbandryPlan.noWindowsHint")}
+            />
           ) : (
             plan.windows.map((w) => <WindowRow key={`${w.key}-${w.start}`} window={w} />)
           )}

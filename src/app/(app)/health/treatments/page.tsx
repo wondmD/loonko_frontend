@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
 import { useCattle } from "@/features/cattle/hooks/use-cattle";
 import { useHealth } from "@/features/health/hooks/use-health";
+import { useTranslation } from "@/lib/i18n";
 import { formatMoney } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -35,6 +36,7 @@ const schema = Yup.object({
 export default function TreatmentsPage() {
   const role = useAuthStore((s) => s.user?.role);
   const canWrite = role === "OWNER" || role === "VETERINARIAN";
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const health = useHealth();
   const cattle = useCattle({ status: "ACTIVE" });
@@ -45,13 +47,13 @@ export default function TreatmentsPage() {
   return (
     <div>
       <PageHeader
-        title="Health"
+        title={t("health.treatments")}
         description="Clinical treatments. Optional cost posts to Finance."
         actions={
           canWrite ? (
             <Button onClick={() => setOpen(true)}>
               <Plus className="h-4 w-4" />
-              Add treatment
+              {t("common.add")}
             </Button>
           ) : null
         }
@@ -59,9 +61,9 @@ export default function TreatmentsPage() {
 
       <ModuleTabs
         items={[
-          { href: "/health", label: "Records", exact: true },
-          { href: "/health/vaccinations", label: "Vaccinations" },
-          { href: "/health/treatments", label: "Treatments" },
+          { href: "/health", label: t("health.records"), exact: true },
+          { href: "/health/vaccinations", label: t("health.vaccinations") },
+          { href: "/health/treatments", label: t("health.treatments") },
         ]}
       />
 
@@ -73,7 +75,7 @@ export default function TreatmentsPage() {
         />
       ) : null}
       {!health.treatments.isLoading && rows.length === 0 ? (
-        <EmptyState title="No treatments" description="Record diagnosis and medication here." />
+        <EmptyState title={t("health.noTreatments")} description="Record diagnosis and medication here." />
       ) : null}
 
       <div className="space-y-3">
@@ -95,7 +97,7 @@ export default function TreatmentsPage() {
         ))}
       </div>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Add treatment">
+      <Modal open={open} onClose={() => setOpen(false)} title={`${t("common.add")} ${t("health.treatments")}`}>
         <Formik
           initialValues={{
             cattle: options[0]?.value || "",
@@ -134,22 +136,22 @@ export default function TreatmentsPage() {
           {({ values, handleChange, handleBlur, status }) => (
             <Form className="space-y-4">
               <Select
-                label="Cattle"
+                label={t("cattle.title")}
                 name="cattle"
                 value={values.cattle}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                options={[{ label: "Select…", value: "" }, ...options]}
+                options={[{ label: `${t("common.select")}…`, value: "" }, ...options]}
               />
               <Input
-                label="Diagnosis"
+                label={t("health.diagnosis")}
                 name="diagnosis"
                 value={values.diagnosis}
                 onChange={handleChange}
                 onBlur={handleBlur}
               />
               <Input
-                label="Medication"
+                label={t("health.medication")}
                 name="medication"
                 value={values.medication}
                 onChange={handleChange}
@@ -181,7 +183,7 @@ export default function TreatmentsPage() {
                 onBlur={handleBlur}
               />
               <Input
-                label="Cost (optional)"
+                label={t("feedPage.costOptional")}
                 name="cost"
                 type="number"
                 step="0.01"
@@ -197,7 +199,7 @@ export default function TreatmentsPage() {
                 onBlur={handleBlur}
               />
               <Textarea
-                label="Notes"
+                label={t("cattle.notes")}
                 name="notes"
                 value={values.notes}
                 onChange={handleChange}
@@ -209,7 +211,7 @@ export default function TreatmentsPage() {
                 className="w-full"
                 loading={health.createTreatment.isPending}
               >
-                Save
+                {t("common.save")}
               </Button>
             </Form>
           )}

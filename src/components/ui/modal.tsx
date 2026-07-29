@@ -45,7 +45,7 @@ export function Modal({
             )}
           >
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="font-display text-lg font-semibold">{title}</h2>
+              <h2 className="font-display text-xl font-semibold">{title}</h2>
               <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close">
                 <X className="h-4 w-4" />
               </Button>

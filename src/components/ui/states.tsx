@@ -28,9 +28,9 @@ export function EmptyState({
           <Icon className="h-6 w-6" />
         </div>
       ) : null}
-      <h3 className="font-display text-lg font-semibold">{title}</h3>
+      <h3 className="font-display text-xl font-semibold">{title}</h3>
       {description ? (
-        <p className="mt-2 max-w-md text-sm text-muted-foreground">{description}</p>
+        <p className="mt-2 max-w-md text-base text-muted-foreground">{description}</p>
       ) : null}
       {action ? <div className="mt-5">{action}</div> : null}
     </div>
@@ -58,8 +58,8 @@ export function ErrorState({
 }) {
   return (
     <div className="rounded-2xl border border-danger/30 bg-danger/5 p-6 text-center">
-      <h3 className="font-display text-lg font-semibold text-danger">{title}</h3>
-      {message ? <p className="mt-2 text-sm text-muted-foreground">{message}</p> : null}
+      <h3 className="font-display text-xl font-semibold text-danger">{title}</h3>
+      {message ? <p className="mt-2 text-base text-muted-foreground">{message}</p> : null}
       {onRetry ? (
         <Button className="mt-4" variant="secondary" onClick={onRetry}>
           Try again

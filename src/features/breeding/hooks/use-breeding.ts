@@ -23,6 +23,16 @@ export function useBreeding() {
     queryFn: () => breedingApi.listBirths(),
   });
 
+  const herd = useQuery({
+    queryKey: ["breeding", "herd"],
+    queryFn: () => breedingApi.herd(),
+  });
+
+  const upcoming = useQuery({
+    queryKey: ["breeding", "upcoming"],
+    queryFn: () => breedingApi.upcoming({ days: 30 }),
+  });
+
   const createEvent = useMutation({
     mutationFn: breedingApi.createEvent,
     meta: { successMessage: "Breeding event saved" },
@@ -52,9 +62,19 @@ export function useBreeding() {
     events,
     pregnancies,
     births,
+    herd,
+    upcoming,
     createEvent,
     createPregnancy,
     updatePregnancy,
     createBirth,
   };
+}
+
+export function useBreedingCattleHistory(cattleId: number) {
+  return useQuery({
+    queryKey: ["breeding", "herd", cattleId],
+    queryFn: () => breedingApi.cattleHistory(cattleId),
+    enabled: Number.isFinite(cattleId) && cattleId > 0,
+  });
 }
