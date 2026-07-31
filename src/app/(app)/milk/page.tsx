@@ -53,7 +53,7 @@ export default function MilkPage() {
   const canWrite = canAccess(role, "milkWrite");
   const [open, setOpen] = useState(false);
   const milk = useMilk();
-  const cattle = useCattle({ status: "ACTIVE" });
+  const cattle = useCattle({ status: "ACTIVE", herd_filter: "milking" });
   const rows = milk.herd.data?.results ?? [];
 
   const cattleOptions =

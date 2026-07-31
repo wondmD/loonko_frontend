@@ -42,7 +42,7 @@ export default function CalvingPage() {
   const duePregnancies = useMemo(
     () =>
       pregnancies.filter(
-        (p) => p.status === "PREGNANT" || p.status === "OPEN",
+        (p) => p.status === "PREGNANT",
       ),
     [pregnancies],
   );

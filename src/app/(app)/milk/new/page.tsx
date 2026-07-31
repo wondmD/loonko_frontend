@@ -25,7 +25,7 @@ const schema = Yup.object({
 function MilkNewForm() {
   const router = useRouter();
   const milk = useMilk();
-  const cattle = useCattle({ status: "ACTIVE" });
+  const cattle = useCattle({ status: "ACTIVE", herd_filter: "milking" });
   const { t } = useTranslation();
   const options =
     cattle.list.data?.results.map((c) => ({

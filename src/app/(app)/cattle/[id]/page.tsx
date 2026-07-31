@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatCard } from "@/components/ui/stat-card";
+import { Modal } from "@/components/ui/modal";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
 import {
@@ -45,6 +46,7 @@ export default function CattleDetailPage({
   const [editOpen, setEditOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [activePhoto, setActivePhoto] = useState<{ src: string; label: string } | null>(null);
   const [photoDrafts, setPhotoDrafts] = useState<{
     photo_front: File | null;
     photo_left: File | null;
@@ -116,27 +118,53 @@ export default function CattleDetailPage({
         />
       ) : null}
 
-      <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 scrollbar-hide">
-        {(
-          [
-            [t("cattleDetail.frontPhoto"), data.photo_front_url],
-            [t("cattleDetail.leftPhoto"), data.photo_left_url],
-            [t("cattleDetail.rightPhoto"), data.photo_right_url],
-          ] as const
-        ).map(([label, src]) => (
-          <Card key={label} className="min-w-[85vw] snap-center overflow-hidden sm:min-w-0 flex-shrink-0">
-            <CattlePhoto
-              src={src}
-              alt={`${data.tag_id} ${label}`}
-              size="card"
-              className="rounded-none object-cover aspect-video sm:aspect-square"
-            />
-            <CardContent className="py-2">
-              <p className="text-center text-sm font-medium">{label}</p>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="w-full max-w-full overflow-hidden">
+        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+          {(
+            [
+              [t("cattleDetail.frontPhoto"), data.photo_front_url],
+              [t("cattleDetail.leftPhoto"), data.photo_left_url],
+              [t("cattleDetail.rightPhoto"), data.photo_right_url],
+            ] as const
+          ).map(([label, src]) => (
+            <div 
+              key={label}
+              className="w-[65vw] max-w-[280px] shrink-0 snap-center sm:w-auto cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => {
+                if (src) setActivePhoto({ src, label });
+              }}
+            >
+              <Card className="overflow-hidden h-full">
+                <CattlePhoto
+                  src={src}
+                  alt={`${data.tag_id} ${label}`}
+                  size="card"
+                  className="rounded-none object-cover aspect-square sm:aspect-square w-full"
+                />
+                <CardContent className="py-2">
+                  <p className="text-center text-sm font-medium">{label}</p>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </div>
       </div>
+
+      <Modal 
+        open={!!activePhoto} 
+        onClose={() => setActivePhoto(null)} 
+        title={activePhoto?.label || ""}
+        className="sm:max-w-2xl"
+      >
+        {activePhoto?.src && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img 
+            src={activePhoto.src} 
+            alt={activePhoto.label}
+            className="w-full h-auto max-h-[70vh] object-contain rounded-xl"
+          />
+        )}
+      </Modal>
 
       {canWrite ? (
         <Card>

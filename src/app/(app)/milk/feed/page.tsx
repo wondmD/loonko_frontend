@@ -38,7 +38,7 @@ function FeedContent() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const feed = useFeed();
-  const cattle = useCattle({ status: "ACTIVE" });
+  const cattle = useCattle({ status: "ACTIVE", herd_filter: "milking" });
   const rows = feed.list.data?.results ?? [];
   const options =
     cattle.list.data?.results.map((c) => ({

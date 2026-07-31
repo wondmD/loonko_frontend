@@ -2,13 +2,11 @@ import type { Metadata } from "next";
 
 import { AppProviders } from "@/providers/app-providers";
 
-import "@fontsource-variable/source-sans-3/index.css";
-import "@fontsource/syne/500.css";
-import "@fontsource/syne/600.css";
-import "@fontsource/syne/700.css";
-import "@fontsource/syne/800.css";
-
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans-next" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-display-next" });
 
 export const metadata: Metadata = {
   title: "Loonkoo — Dairy Farm Tracker",
@@ -21,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className={`h-full ${inter.variable} ${outfit.variable}`}>
       <body className="min-h-full font-sans antialiased">
         <AppProviders>{children}</AppProviders>
       </body>
