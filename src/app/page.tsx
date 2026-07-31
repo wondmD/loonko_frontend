@@ -52,8 +52,11 @@ export default function LandingPage() {
 
   if (isHydrated && isAuthenticated) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-background text-sm text-muted-foreground">
-        {t("common.loading")}
+      <div className="flex min-h-dvh flex-col items-center justify-center bg-background gap-4">
+        <span className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent shadow-xs" />
+        <p className="text-sm font-medium text-muted-foreground animate-pulse">
+          {t("common.loading")}
+        </p>
       </div>
     );
   }
@@ -128,30 +131,32 @@ export default function LandingPage() {
     <div className="min-h-dvh bg-background text-foreground antialiased selection:bg-primary/20 selection:text-foreground">
       {/* Sticky Header */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-card/85 backdrop-blur-xl transition-all">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-3">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-3 py-3 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Image
               src="/brand/loonkoo-logo.png"
               alt="Loonkoo Logo"
               width={34}
               height={34}
-              className="h-8 w-8 object-contain"
+              className="h-7 w-7 sm:h-8 sm:w-8 object-contain shrink-0"
               priority
             />
-            <span className="font-display text-xl font-extrabold tracking-tight text-foreground">
+            <span className="hidden xs:block sm:block font-display text-lg sm:text-xl font-extrabold tracking-tight text-foreground truncate max-w-[100px] sm:max-w-none">
               {t("appName")}
             </span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-card hover:bg-muted/50 transition border border-border text-foreground shadow-xs"
+              className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-card hover:bg-muted/50 transition border border-border text-foreground shadow-xs"
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {theme === 'dark' ? <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
             </button>
-            <LanguageSelector variant="header" />
+            <div className="scale-90 sm:scale-100 origin-right shrink-0">
+              <LanguageSelector variant="header" />
+            </div>
             <Link
               href="/login"
               className="hidden text-sm font-semibold text-foreground/80 hover:text-foreground sm:inline-block transition-colors"
@@ -160,7 +165,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/register"
-              className="inline-flex h-9 items-center justify-center rounded-xl bg-primary px-4 text-xs font-semibold text-primary-foreground shadow-xs transition hover:bg-primary/90"
+              className="inline-flex h-8 sm:h-9 items-center justify-center rounded-lg sm:rounded-xl bg-primary px-3 sm:px-4 text-[11px] sm:text-xs font-semibold text-primary-foreground shadow-xs transition hover:bg-primary/90 shrink-0 whitespace-nowrap"
             >
               {t("landing.createFarm")}
             </Link>

@@ -35,7 +35,7 @@ function MilkNewForm() {
 
   return (
     <div>
-      <PageHeader title={t("milk.logYield")} description="Optimized for fast mobile logging." />
+      <PageHeader title={t("milk.logYield")} description={t("milk.logYieldDesc")} />
       <Card>
         <CardHeader>
           <h2 className="font-display text-lg font-semibold">{t("dashboard.todayMilk")}</h2>

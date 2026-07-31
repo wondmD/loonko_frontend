@@ -85,7 +85,7 @@ export function LanguageSelector({ variant = "header", className }: LanguageSele
       </button>
 
       {open ? (
-        <div className="absolute right-0 mt-2 z-50 w-44 rounded-xl border border-border bg-popover p-1.5 shadow-lg backdrop-blur-md animate-in fade-in zoom-in-95">
+        <div className="absolute right-0 mt-2 z-50 w-44 rounded-xl border border-border bg-card p-1.5 shadow-xl animate-in fade-in zoom-in-95">
           <p className="px-2 py-1 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
             Language / ቋንቋ / Afaan
           </p>
@@ -101,7 +101,7 @@ export function LanguageSelector({ variant = "header", className }: LanguageSele
                     "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition",
                     active
                       ? "bg-primary text-primary-foreground font-semibold"
-                      : "text-popover-foreground hover:bg-muted",
+                      : "text-foreground hover:bg-muted",
                   )}
                 >
                   <span className="flex items-center gap-2">

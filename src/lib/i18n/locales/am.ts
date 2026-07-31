@@ -93,6 +93,7 @@ export const am: typeof en = {
   dashboard: {
     welcome: "እንኳን ደህና መጡ",
     summaryTitle: "የዛሬው አጠቃላይ መረጃ",
+    todayMilk: "የዛሬ ወተት",
     milkToday: "ዛሬ የተሰበሰበ ወተት",
     activeCattle: "በእርባታው ያሉ ከብቶች",
     pendingHealth: "የሚጠበቁ የጤና እንክብካቤዎች",
@@ -258,9 +259,11 @@ export const am: typeof en = {
 
   milk: {
     title: "የወተት ምርት",
-    subtitle: "የዕለታዊ የጠዋት እና የምሽት የወተት ምርት እና የጥራት ደረጃን ይመዝግቡ።",
+    subtitle: "የጠዋት እና የማታ የወተት ምርት መጠን እንዲሁም ጥራት ይመዝግቡ።",
+    logYield: "የወተት ምርት መዝግብ",
+    logYieldDesc: "በሞባይል ስልክ በፍጥነት ለመመዝገብ የተመቻቸ።",
     logMilk: "የወተት ምርት መዝግብ",
-    morningYield: "የጠዋት ምርት (በሊትር)",
+    morningYield: "የጠዋት ምርት (ሊትር)",
     eveningYield: "የምሽት ምርት (በሊትር)",
     totalYield: "ጠቅላላ የዕለት ምርት",
     quality: "የጥራት ምርመራ",

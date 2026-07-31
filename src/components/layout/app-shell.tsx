@@ -295,9 +295,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
 
-      {/* Mobile Bottom Bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/80 bg-card/95 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden shadow-lg">
-        <div className="mx-auto flex max-w-md items-center justify-around gap-1">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/80 bg-card/95 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden shadow-[0_-4px_15px_rgba(0,0,0,0.05)] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mx-auto flex w-max min-w-full items-center justify-start sm:justify-around gap-2 px-4 pt-2">
           {mobileNav.map((item) => {
             const Icon = ICONS[item.icon];
             const active =

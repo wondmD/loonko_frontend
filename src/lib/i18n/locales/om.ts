@@ -93,6 +93,7 @@ export const om: typeof en = {
   dashboard: {
     welcome: "Baga nagaan dhuftan",
     summaryTitle: "Guurmeessaa Guyyaa Har'aa",
+    todayMilk: "Aannan Har'aa",
     milkToday: "Aanan Har'a Sassaabame",
     activeCattle: "Saawwan Qonnaa Irra Jiran",
     pendingHealth: "Kunuunsa Fayyaa Eegamu",
@@ -259,6 +260,8 @@ export const om: typeof en = {
   milk: {
     title: "Oomisha Aanaanii",
     subtitle: "Oomisha aanan ganamaa fi galgalaa guyyaa guyyaan galmeessaa.",
+    logYield: "Omisha Aannanii Galmeessi",
+    logYieldDesc: "Bilbilaan saffisaan galmeessuuf kan mijaaye.",
     logMilk: "Oomisha Aanaan Galmeessi",
     morningYield: "Oomisha Ganamaa (Liitiraan)",
     eveningYield: "Oomisha Galgalaa (Liitiraan)",

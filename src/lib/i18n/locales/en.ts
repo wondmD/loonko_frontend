@@ -91,6 +91,7 @@ export const en = {
   dashboard: {
     welcome: "Welcome back",
     summaryTitle: "Today's Summary",
+    todayMilk: "Today's Milk",
     milkToday: "Milk Collected Today",
     activeCattle: "Active Cattle",
     pendingHealth: "Pending Health Care",
@@ -257,6 +258,8 @@ export const en = {
   milk: {
     title: "Milk Production",
     subtitle: "Record daily morning and evening milk yields and quality.",
+    logYield: "Record Milk Yield",
+    logYieldDesc: "Optimized for fast mobile logging.",
     logMilk: "Record Milk Yield",
     morningYield: "Morning Yield (Liters)",
     eveningYield: "Evening Yield (Liters)",
