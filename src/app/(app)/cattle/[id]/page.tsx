@@ -116,7 +116,7 @@ export default function CattleDetailPage({
         />
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 scrollbar-hide">
         {(
           [
             [t("cattleDetail.frontPhoto"), data.photo_front_url],
@@ -124,14 +124,14 @@ export default function CattleDetailPage({
             [t("cattleDetail.rightPhoto"), data.photo_right_url],
           ] as const
         ).map(([label, src]) => (
-          <Card key={label} className="overflow-hidden">
+          <Card key={label} className="min-w-[85vw] snap-center overflow-hidden sm:min-w-0 flex-shrink-0">
             <CattlePhoto
               src={src}
               alt={`${data.tag_id} ${label}`}
               size="card"
-              className="rounded-none"
+              className="rounded-none object-cover aspect-video sm:aspect-square"
             />
-            <CardContent className="py-3">
+            <CardContent className="py-2">
               <p className="text-center text-sm font-medium">{label}</p>
             </CardContent>
           </Card>
