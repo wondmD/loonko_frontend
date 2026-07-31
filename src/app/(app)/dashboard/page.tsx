@@ -13,7 +13,13 @@ import Link from "next/link";
 import {
   Area,
   AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -58,6 +64,32 @@ export default function DashboardPage() {
       date: String(p.date).slice(5, 10),
       liters: Number(p.liters),
     })) ?? [];
+
+  const herdData = Object.entries(cattle.facets.data?.categories ?? {}).map(([name, value]) => ({
+    name: name.charAt(0) + name.slice(1).toLowerCase(),
+    value,
+  })).filter((item) => item.value > 0);
+  const HERD_COLORS = ["#10b981", "#f59e0b", "#3b82f6", "#6366f1", "#ec4899", "#8b5cf6"];
+
+  const financeData = (finance?.byCategory.data?.breakdown ?? []).map((item) => ({
+    name: item.category,
+    income: item.type === "INCOME" ? Number(item.total) : 0,
+    expense: item.type === "EXPENSE" ? Number(item.total) : 0,
+  }));
+  const aggregatedFinance = Object.values(
+    financeData.reduce((acc, curr) => {
+      if (!acc[curr.name]) acc[curr.name] = { name: curr.name, income: 0, expense: 0 };
+      acc[curr.name].income += curr.income;
+      acc[curr.name].expense += curr.expense;
+      return acc;
+    }, {} as Record<string, any>)
+  ).filter((item: any) => item.income > 0 || item.expense > 0);
+
+  const husbandryData = [
+    { name: "Overdue", value: husbandry.data?.counts.overdue ?? 0, fill: "#ef4444" },
+    { name: "Today", value: husbandry.data?.counts.due_today ?? 0, fill: "#f59e0b" },
+    { name: "Upcoming", value: husbandry.data?.counts.upcoming ?? 0, fill: "#3b82f6" },
+  ].filter((item) => item.value > 0);
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -133,6 +165,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
+        {/* Milk Trends */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <h2 className="font-display text-lg font-bold">{t("dashboard.milkTrend")}</h2>
@@ -170,7 +203,114 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
+        {/* Husbandry Board Summary Chart */}
         <Card>
+          <CardHeader>
+            <h2 className="font-display text-lg font-bold">Husbandry Tasks</h2>
+            <p className="text-xs text-muted-foreground">Current Board Progress</p>
+          </CardHeader>
+          <CardContent className="h-80 flex flex-col items-center justify-center">
+            {husbandryData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={husbandryData}
+                    cx="50%"
+                    cy="45%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {husbandryData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ borderRadius: "0.5rem", border: "1px solid var(--color-border)" }}
+                  />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("dashboard.noTasksDue")}</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Herd Status Distribution */}
+        <Card>
+          <CardHeader>
+            <h2 className="font-display text-lg font-bold">Herd Status</h2>
+            <p className="text-xs text-muted-foreground">Breakdown of actively tracked cattle</p>
+          </CardHeader>
+          <CardContent className="h-80">
+            {herdData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={herdData}
+                    cx="50%"
+                    cy="45%"
+                    labelLine={false}
+                    outerRadius={100}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                  >
+                    {herdData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={HERD_COLORS[index % HERD_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ borderRadius: "0.5rem", border: "1px solid var(--color-border)" }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <p className="text-sm text-muted-foreground">No cattle registered yet.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Finance Overview (Owner Only) */}
+        {role === "OWNER" && (
+          <Card>
+            <CardHeader>
+              <h2 className="font-display text-lg font-bold">Financial Overview</h2>
+              <p className="text-xs text-muted-foreground">Income vs Expenses (30 Days)</p>
+            </CardHeader>
+            <CardContent className="h-80">
+              {aggregatedFinance.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={aggregatedFinance} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} tickMargin={10} stroke="var(--color-muted-foreground)" />
+                    <YAxis tick={{ fontSize: 11 }} stroke="var(--color-muted-foreground)" />
+                    <Tooltip
+                      cursor={{ fill: "var(--color-muted)", opacity: 0.2 }}
+                      contentStyle={{ borderRadius: "0.5rem", border: "1px solid var(--color-border)" }}
+                    />
+                    <Legend verticalAlign="top" height={36} iconType="circle" />
+                    <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="expense" name="Expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <p className="text-sm text-muted-foreground">No financial data in the last 30 days.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-1">
           <CardHeader>
             <h2 className="font-display text-lg font-bold">{t("dashboard.careQueue")}</h2>
           </CardHeader>

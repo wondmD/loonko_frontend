@@ -1,6 +1,9 @@
 "use client";
 
 import { Bell, RefreshCw } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api/client";
+import { toast } from "@/stores/toast-store";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +20,22 @@ export default function AlertsPage() {
   const alerts = useAlerts();
   const rows = alerts.list.data?.results ?? [];
   const isOwner = role === "OWNER";
+  const queryClient = useQueryClient();
+
+  const dryOffMutation = useMutation({
+    mutationFn: async (cattleId: number) => {
+      const res = await apiClient.post(`/cattle/${cattleId}/dry_off/`);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Cattle successfully dried off");
+      queryClient.invalidateQueries({ queryKey: ["alerts"] });
+      queryClient.invalidateQueries({ queryKey: ["cattle"] });
+    },
+    onError: (err: any) => {
+      toast.error("Action failed", err.response?.data?.detail || "Failed to dry off cattle");
+    }
+  });
 
   return (
     <div>
@@ -90,6 +109,16 @@ export default function AlertsPage() {
                     onClick={() => alerts.markRead.mutate(alert.id)}
                   >
                     {t("alerts.markAsRead")}
+                  </Button>
+                ) : null}
+                {alert.title.toLowerCase().includes("dry-off") && alert.cattle ? (
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() => dryOffMutation.mutate(alert.cattle!)}
+                    disabled={dryOffMutation.isPending}
+                  >
+                    {dryOffMutation.isPending && dryOffMutation.variables === alert.cattle ? "Processing..." : "Dry-off the cattle"}
                   </Button>
                 ) : null}
                 <Button

@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
 import { buildCattleFormData, useCattle } from "@/features/cattle/hooks/use-cattle";
+import { useTranslation } from "@/lib/i18n";
 import type { CattleDetail } from "@/types";
 
 const schema = Yup.object({
@@ -35,10 +36,11 @@ export function EditCattleModal({
   cattle: CattleDetail;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
   const { update } = useCattle();
 
   return (
-    <Modal open={open} onClose={onClose} title={`Edit ${cattle.tag_id}`} className="sm:max-w-xl">
+    <Modal open={open} onClose={onClose} title={`${t("cattle.form.editAnimal")}${cattle.tag_id}`} className="sm:max-w-xl">
       <Formik
         enableReinitialize
         initialValues={{
@@ -73,11 +75,10 @@ export function EditCattleModal({
         {({ values, errors, touched, handleChange, handleBlur, status }) => (
           <Form className="space-y-4">
             <p className="rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-              Age and last calving / AI dates drive automatic calf · heifer · cow detection
-              and suggested husbandry windows.
+              {t("cattle.form.editHint")}
             </p>
             <Input
-              label="Tag ID"
+              label={t("cattle.form.tagId")}
               name="tag_id"
               value={values.tag_id}
               onChange={handleChange}
@@ -85,56 +86,68 @@ export function EditCattleModal({
               error={touched.tag_id ? errors.tag_id : undefined}
             />
             <Input
-              label="Name"
+              label={t("cattle.form.name")}
               name="name"
               value={values.name}
               onChange={handleChange}
               onBlur={handleBlur}
             />
-            <Input
-              label="Breed"
+            <Select
+              label={t("cattle.form.breed")}
               name="breed"
               value={values.breed}
               onChange={handleChange}
               onBlur={handleBlur}
+              options={[
+                { label: t("cattle.form.select"), value: "" },
+                { label: t("cattle.breeds.holstein"), value: "Holstein Friesian" },
+                { label: t("cattle.breeds.jersey"), value: "Jersey" },
+                { label: t("cattle.breeds.boran"), value: "Boran" },
+                { label: t("cattle.breeds.fogera"), value: "Fogera" },
+                { label: t("cattle.breeds.horro"), value: "Horro" },
+                { label: t("cattle.breeds.crossbreed"), value: "Crossbreed" },
+                { label: t("cattle.breeds.begait"), value: "Begait" },
+                { label: t("cattle.breeds.barca"), value: "Barca" },
+                { label: t("cattle.breeds.other"), value: "Other" },
+              ]}
             />
             <div className="grid gap-4 sm:grid-cols-2">
               <Select
-                label="Gender"
+                label={t("cattle.form.gender")}
                 name="sex"
                 value={values.sex}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 options={[
-                  { label: "Female (default)", value: "FEMALE" },
-                  { label: "Male", value: "MALE" },
+                  { label: t("cattle.form.femaleDefault"), value: "FEMALE" },
+                  { label: t("cattle.form.male"), value: "MALE" },
                 ]}
               />
               <Select
-                label="Status"
+                label={t("cattle.form.status")}
                 name="status"
                 value={values.status}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 options={[
-                  { label: "Active", value: "ACTIVE" },
-                  { label: "Sold", value: "SOLD" },
-                  { label: "Dead", value: "DEAD" },
-                  { label: "Culled", value: "CULLED" },
+                  { label: t("cattle.cattleStatus.active"), value: "ACTIVE" },
+                  { label: t("cattle.cattleStatus.sold"), value: "SOLD" },
+                  { label: t("cattle.cattleStatus.dead"), value: "DEAD" },
+                  { label: t("cattle.cattleStatus.culled"), value: "CULLED" },
                 ]}
               />
             </div>
             <Input
-              label="Date of birth"
+              label={t("cattle.form.dob")}
               name="date_of_birth"
               type="date"
               value={values.date_of_birth}
               onChange={handleChange}
               onBlur={handleBlur}
-              hint="Used to classify calf vs heifer and first AI window."
+              hint={t("cattle.form.dobHint")}
             />
             <Textarea
-              label="Notes"
+              label={t("cattle.form.notes")}
               name="notes"
               value={values.notes}
               onChange={handleChange}
@@ -143,10 +156,10 @@ export function EditCattleModal({
             {status ? <p className="text-sm text-danger">{status}</p> : null}
             <div className="flex justify-end gap-2">
               <Button type="button" variant="secondary" onClick={onClose}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button type="submit" loading={update.isPending}>
-                Save changes
+                {t("cattle.form.saveAnimal")}
               </Button>
             </div>
           </Form>

@@ -17,6 +17,9 @@ import {
 } from "@/features/cattle/components/cattle-photo";
 import { EditCattleModal } from "@/features/cattle/components/edit-cattle-modal";
 import { HusbandryPlanPanel } from "@/features/cattle/components/husbandry-plan-panel";
+import { PedigreeTree } from "@/features/cattle/components/pedigree-tree";
+import { GrowthTracker } from "@/features/cattle/components/growth-tracker";
+import { StatusChangeModal } from "@/features/cattle/components/status-change-modal";
 import { buildCattleFormData, useCattle, useCattleDetail } from "@/features/cattle/hooks/use-cattle";
 import { HusbandryTaskRow } from "@/features/husbandry/components/husbandry-task-row";
 import { canAccess } from "@/lib/auth/access";
@@ -40,6 +43,7 @@ export default function CattleDetailPage({
   const { update } = useCattle();
   const { language, t } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [photoDrafts, setPhotoDrafts] = useState<{
     photo_front: File | null;
@@ -73,10 +77,23 @@ export default function CattleDetailPage({
         description={data.name || t("cattleDetail.eyebrow")}
         actions={
           canEditProfile ? (
-            <Button variant="secondary" onClick={() => setEditOpen(true)}>
-              <Pencil className="h-4 w-4" />
-              {t("common.edit")}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setStatusOpen(true)}
+              >
+                {t('cattle.status_change.button')}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setEditOpen(true)}
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                {t("common.edit")}
+              </Button>
+            </div>
           ) : null
         }
       />
@@ -87,6 +104,15 @@ export default function CattleDetailPage({
           onClose={() => setEditOpen(false)}
           cattle={data}
           onSaved={() => refetch()}
+        />
+      ) : null}
+
+      {statusOpen && canEditProfile && data ? (
+        <StatusChangeModal
+          open={statusOpen}
+          onOpenChange={setStatusOpen}
+          cattleId={cattleId}
+          currentStatus={data.status}
         />
       ) : null}
 
@@ -210,6 +236,16 @@ export default function CattleDetailPage({
       </div>
 
       {data.sex === "FEMALE" ? <HusbandryPlanPanel plan={data.husbandry_plan} /> : null}
+
+      <div className="grid gap-6">
+        <GrowthTracker 
+          cattleId={cattleId} 
+          latestBcs={data.latest_bcs} 
+          latestWeight={data.latest_weight} 
+          logs={data.growth_logs} 
+        />
+        <PedigreeTree data={data.pedigree_tree} />
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

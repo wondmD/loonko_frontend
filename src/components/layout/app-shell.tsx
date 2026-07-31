@@ -99,7 +99,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 const active =
                   !moreSpecificMatch &&
                   (pathname === item.href || pathname.startsWith(`${item.href}/`));
-                const itemLabel = t(`nav.${item.module}`);
+                const navKey = item.href === '/breeding/calving' ? 'calving' : item.module;
+                const itemLabel = t(`nav.${navKey}` as any);
                 return (
                   <Link
                     key={item.href}

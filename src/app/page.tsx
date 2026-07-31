@@ -23,7 +23,8 @@ import { useEffect } from "react";
 
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { useTranslation } from "@/lib/i18n";
-import { useAuthStore } from "@/stores/auth-store";
+import { useAuthStore, useUiStore } from "@/stores/auth-store";
+import { Moon, Sun } from "lucide-react";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -40,6 +41,8 @@ export default function LandingPage() {
   const router = useRouter();
   const { isAuthenticated, isHydrated } = useAuthStore();
   const { t } = useTranslation();
+  const theme = useUiStore((s) => s.theme);
+  const setTheme = useUiStore((s) => s.setTheme);
 
   useEffect(() => {
     if (isHydrated && isAuthenticated) {
@@ -141,6 +144,13 @@ export default function LandingPage() {
           </Link>
 
           <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-card hover:bg-muted/50 transition border border-border text-foreground shadow-xs"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
             <LanguageSelector variant="header" />
             <Link
               href="/login"
@@ -187,7 +197,7 @@ export default function LandingPage() {
               variants={fadeUp}
               initial="hidden"
               animate="show"
-              className="mt-6 font-display text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl lg:text-7xl"
+              className="mt-6 font-display text-4xl font-extrabold tracking-tight text-foreground sm:text-6xl lg:text-7xl leading-tight"
             >
               {t("landing.heroTitle")}
             </motion.h1>
@@ -303,8 +313,31 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Roles & Permissions Section */}
-      <section className="py-20 sm:py-28">
+      {/* Dashboard Mockup Showcase */}
+      <section className="bg-muted/30 py-20 sm:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center mb-16">
+            <h2 className="font-display text-3xl font-extrabold text-foreground sm:text-4xl">
+              Powerful Analytics at Your Fingertips
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Monitor your entire herd, track milk production trends, and manage finances securely from one beautifully designed interface.
+            </p>
+          </div>
+          <div className="relative rounded-[2rem] overflow-hidden shadow-2xl ring-1 ring-border border-8 border-background bg-card mx-auto max-w-5xl">
+            <Image
+              src="/brand/dashboard_preview.png"
+              alt="Loonkoo Dashboard Preview"
+              width={1600}
+              height={900}
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Access Roles */}
+      <section className="py-20 sm:py-32">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">

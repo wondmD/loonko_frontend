@@ -200,6 +200,10 @@ export interface CattleDetail extends Cattle {
   alerts: Alert[];
   upcoming_vaccinations: Vaccination[];
   husbandry_tasks: HusbandryTask[];
+  latest_bcs: number | null;
+  latest_weight: number | null;
+  growth_logs: any[];
+  pedigree_tree: any;
 }
 
 export interface MilkRecord {

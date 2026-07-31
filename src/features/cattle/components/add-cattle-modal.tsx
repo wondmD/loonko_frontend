@@ -11,6 +11,7 @@ import { Modal } from "@/components/ui/modal";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
+import { useTranslation } from "@/lib/i18n";
 import { PhotoUploadField } from "@/features/cattle/components/cattle-photo";
 import { buildCattleFormData, useCattle } from "@/features/cattle/hooks/use-cattle";
 import { husbandryApi } from "@/lib/api/services";
@@ -50,6 +51,9 @@ const schema = Yup.object({
   breeding_method: Yup.string(),
   previous_calvings: Yup.number().min(0).max(20),
   last_calving_date: Yup.string(),
+  mother_origin: Yup.string(),
+  mother: Yup.string(),
+  mother_external_id: Yup.string(),
 });
 
 export function AddCattleModal({
@@ -59,7 +63,8 @@ export function AddCattleModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const { create } = useCattle();
+  const { t } = useTranslation();
+  const { create, list: cattleListQuery } = useCattle({ limit: 1000, sex: "FEMALE" });
   const settings = useQuery({
     queryKey: ["husbandry", "settings"],
     queryFn: husbandryApi.settings,
@@ -100,7 +105,7 @@ export function AddCattleModal({
   }
 
   return (
-    <Modal open={open} onClose={handleClose} title="Add animal" className="sm:max-w-xl">
+    <Modal open={open} onClose={handleClose} title={t("cattle.form.addAnimal")} className="sm:max-w-xl">
       <Formik
         initialValues={{
           tag_id: "",
@@ -114,6 +119,9 @@ export function AddCattleModal({
           breeding_method: "AI",
           previous_calvings: 0,
           last_calving_date: "",
+          mother_origin: "NONE", // NONE, INTERNAL, EXTERNAL
+          mother: "",
+          mother_external_id: "",
         }}
         validationSchema={schema}
         onSubmit={async (values, helpers) => {
@@ -145,6 +153,12 @@ export function AddCattleModal({
               notes: values.notes,
               status: "ACTIVE",
             };
+
+            if (values.mother_origin === "INTERNAL" && values.mother) {
+              payload.mother = Number(values.mother);
+            } else if (values.mother_origin === "EXTERNAL" && values.mother_external_id) {
+              payload.mother_external_id = values.mother_external_id;
+            }
 
             if (breedingReady) {
               payload.is_pregnant = values.is_pregnant === "true";
@@ -182,33 +196,33 @@ export function AddCattleModal({
               : null;
 
           const stageHint = !isFemale
-            ? "Males skip pregnancy and calving history."
+            ? t("cattle.form.stageHintMale")
             : !values.date_of_birth
-              ? "Add date of birth so we know if this is a calf, heifer, or cow."
+              ? t("cattle.form.stageHintNoDob")
               : isCalf
-                ? "Calf — no pregnancy status needed."
+                ? t("cattle.form.stageHintCalf")
                 : age != null && age < firstBreedingAge
-                  ? "Growing heifer — too young for breeding intake."
-                  : "Breeding age — tell us pregnancy and calving history.";
+                  ? t("cattle.form.stageHintHeifer")
+                  : t("cattle.form.stageHintCow");
 
           return (
             <Form className="space-y-4">
               <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-3">
-                <p className="text-sm font-medium">Photos (required)</p>
+                <p className="text-sm font-medium">{t("cattle.form.photosRequired")}</p>
                 <PhotoUploadField
-                  label="Front"
+                  label={t("cattle.form.front")}
                   preview={previews.photo_front}
                   required
                   onChange={(file) => setPhoto("photo_front", file)}
                 />
                 <PhotoUploadField
-                  label="Left side"
+                  label={t("cattle.form.leftSide")}
                   preview={previews.photo_left}
                   required
                   onChange={(file) => setPhoto("photo_left", file)}
                 />
                 <PhotoUploadField
-                  label="Right side"
+                  label={t("cattle.form.rightSide")}
                   preview={previews.photo_right}
                   required
                   onChange={(file) => setPhoto("photo_right", file)}
@@ -216,7 +230,7 @@ export function AddCattleModal({
               </div>
 
               <Input
-                label="Tag ID"
+                label={t("cattle.form.tagId")}
                 name="tag_id"
                 value={values.tag_id}
                 onChange={handleChange}
@@ -225,23 +239,35 @@ export function AddCattleModal({
               />
               <div className="grid gap-3 sm:grid-cols-2">
                 <Input
-                  label="Name"
+                  label={t("cattle.form.name")}
                   name="name"
                   value={values.name}
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
-                <Input
-                  label="Breed"
+                <Select
+                  label={t("cattle.form.breed")}
                   name="breed"
                   value={values.breed}
                   onChange={handleChange}
                   onBlur={handleBlur}
+                  options={[
+                    { label: t("cattle.form.select"), value: "" },
+                    { label: t("cattle.breeds.holstein"), value: "Holstein Friesian" },
+                    { label: t("cattle.breeds.jersey"), value: "Jersey" },
+                    { label: t("cattle.breeds.boran"), value: "Boran" },
+                    { label: t("cattle.breeds.fogera"), value: "Fogera" },
+                    { label: t("cattle.breeds.horro"), value: "Horro" },
+                    { label: t("cattle.breeds.crossbreed"), value: "Crossbreed" },
+                    { label: t("cattle.breeds.begait"), value: "Begait" },
+                    { label: t("cattle.breeds.barca"), value: "Barca" },
+                    { label: t("cattle.breeds.other"), value: "Other" },
+                  ]}
                 />
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Select
-                  label="Gender"
+                  label={t("cattle.form.gender")}
                   name="sex"
                   value={values.sex}
                   onChange={(e) => {
@@ -253,12 +279,12 @@ export function AddCattleModal({
                   }}
                   onBlur={handleBlur}
                   options={[
-                    { label: "Female (default)", value: "FEMALE" },
-                    { label: "Male", value: "MALE" },
+                    { label: t("cattle.form.femaleDefault"), value: "FEMALE" },
+                    { label: t("cattle.form.male"), value: "MALE" },
                   ]}
                 />
                 <Input
-                  label="Date of birth"
+                  label={t("cattle.form.dob")}
                   name="date_of_birth"
                   type="date"
                   value={values.date_of_birth}
@@ -275,24 +301,70 @@ export function AddCattleModal({
 
               <div className="rounded-xl bg-primary/5 px-3.5 py-3 text-sm text-muted-foreground">
                 <p className="font-medium text-foreground">
-                  {ageLabel ? `Age: ${ageLabel}` : "Age: unknown (no DOB)"}
+                  {ageLabel ? `${t("cattle.form.ageLabel")}${ageLabel}` : t("cattle.form.ageUnknown")}
                 </p>
                 <p className="mt-1">{stageHint}</p>
               </div>
 
+              <div className="space-y-3 rounded-xl border border-border p-3">
+                <p className="text-sm font-semibold">{t("cattle.pedigree.title")}</p>
+                <Select
+                  label={t("cattle.pedigree.motherOrigin")}
+                  name="mother_origin"
+                  value={values.mother_origin}
+                  onChange={(e) => {
+                    handleChange(e);
+                    setFieldValue("mother", "");
+                    setFieldValue("mother_external_id", "");
+                  }}
+                  onBlur={handleBlur}
+                  options={[
+                    { label: t("cattle.pedigree.originUnknown"), value: "NONE" },
+                    { label: t("cattle.pedigree.originInternal"), value: "INTERNAL" },
+                    { label: t("cattle.pedigree.originExternal"), value: "EXTERNAL" },
+                  ]}
+                />
+                {values.mother_origin === "INTERNAL" ? (
+                  <Select
+                    label={t("cattle.pedigree.selectMother")}
+                    name="mother"
+                    value={values.mother}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    options={[
+                      { label: "Select…", value: "" },
+                      ...(cattleListQuery.data?.results ?? []).map((c) => ({
+                        label: `${c.tag_id} - ${c.name || c.breed || "Cow"}`,
+                        value: String(c.id),
+                      })),
+                    ]}
+                  />
+                ) : null}
+                {values.mother_origin === "EXTERNAL" ? (
+                  <Input
+                    label={t("cattle.pedigree.externalMotherInfo")}
+                    name="mother_external_id"
+                    value={values.mother_external_id}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="e.g. Tag 4012"
+                  />
+                ) : null}
+              </div>
+
               {showRepro ? (
                 <div className="space-y-3 rounded-xl border border-border p-3">
-                  <p className="text-sm font-semibold">Reproduction</p>
+                  <p className="text-sm font-semibold">{t("cattle.form.reproduction")}</p>
                   <Select
-                    label="Is she pregnant?"
+                    label={t("cattle.form.isPregnant")}
                     name="is_pregnant"
                     value={values.is_pregnant}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     options={[
-                      { label: "Select…", value: "" },
-                      { label: "Yes — currently pregnant", value: "true" },
-                      { label: "No — open / not pregnant", value: "false" },
+                      { label: t("cattle.form.select"), value: "" },
+                      { label: t("cattle.form.yesPregnant"), value: "true" },
+                      { label: t("cattle.form.noPregnant"), value: "false" },
                     ]}
                   />
 
@@ -300,7 +372,7 @@ export function AddCattleModal({
                     <>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <Input
-                          label="Insemination / mating date"
+                          label={t("cattle.form.inseminationDate")}
                           name="insemination_date"
                           type="date"
                           value={values.insemination_date}
@@ -308,25 +380,25 @@ export function AddCattleModal({
                           onBlur={handleBlur}
                         />
                         <Select
-                          label="Method"
+                          label={t("cattle.form.method")}
                           name="breeding_method"
                           value={values.breeding_method}
                           onChange={handleChange}
                           onBlur={handleBlur}
                           options={[
-                            { label: "Artificial Insemination", value: "AI" },
-                            { label: "Natural service", value: "NATURAL" },
+                            { label: t("cattle.form.methodAI"), value: "AI" },
+                            { label: t("cattle.form.methodNatural"), value: "NATURAL" },
                           ]}
                         />
                       </div>
                       {expectedCalving ? (
                         <p className="text-xs text-muted-foreground">
-                          Expected calving around <strong>{expectedCalving}</strong> (
-                          {gestationDays}-day gestation).
+                          {t("cattle.form.expectedCalving")} <strong>{expectedCalving}</strong> (
+                          {gestationDays}-{t("cattle.form.gestation")}).
                         </p>
                       ) : null}
                       <Input
-                        label="Previous calves (before this pregnancy)"
+                        label={t("cattle.form.prevCalvesBeforePreg")}
                         name="previous_calvings"
                         type="number"
                         min={0}
@@ -340,7 +412,7 @@ export function AddCattleModal({
 
                   {values.is_pregnant === "false" ? (
                     <Input
-                      label="Number of previous calvings"
+                      label={t("cattle.form.prevCalvings")}
                       name="previous_calvings"
                       type="number"
                       min={0}
@@ -353,20 +425,20 @@ export function AddCattleModal({
 
                   {Number(values.previous_calvings) > 0 ? (
                     <Input
-                      label="Most recent calving date"
+                      label={t("cattle.form.recentCalvingDate")}
                       name="last_calving_date"
                       type="date"
                       value={values.last_calving_date}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      hint="Helps set lactation / voluntary waiting period correctly."
+                      hint={t("cattle.form.recentCalvingHint")}
                     />
                   ) : null}
                 </div>
               ) : null}
 
               <Textarea
-                label="Notes"
+                label={t("cattle.form.notes")}
                 name="notes"
                 value={values.notes}
                 onChange={handleChange}
@@ -374,7 +446,7 @@ export function AddCattleModal({
               />
               {status ? <p className="text-sm text-danger">{status}</p> : null}
               <Button type="submit" className="w-full" loading={create.isPending}>
-                Save animal
+                {t("cattle.form.saveAnimal")}
               </Button>
             </Form>
           );

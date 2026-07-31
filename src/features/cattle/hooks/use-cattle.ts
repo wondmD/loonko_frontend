@@ -14,6 +14,11 @@ export function useCattle(params?: Record<string, string | number | undefined>) 
     queryFn: () => cattleApi.list(params),
   });
 
+  const facets = useQuery({
+    queryKey: ["cattle", "facets", params],
+    queryFn: () => cattleApi.facets(params),
+  });
+
   const create = useMutation({
     mutationFn: (payload: FormData | Record<string, unknown>) => cattleApi.create(payload),
     meta: { successMessage: "Animal added" },
@@ -38,7 +43,7 @@ export function useCattle(params?: Record<string, string | number | undefined>) 
     onSuccess: () => invalidateFarmModules(queryClient),
   });
 
-  return { list, create, update, remove };
+  return { list, facets, create, update, remove };
 }
 
 export function useCattleDetail(id: number) {
@@ -60,6 +65,9 @@ export function buildCattleFormData(
   const form = new FormData();
   Object.entries(values).forEach(([key, value]) => {
     if (value === undefined || value === null || value === "") return;
+    
+    // Explicitly handle "mother" / "father" fields depending on whether they are set
+    // The UI may pass mother=null but mother_external_id="External Cow"
     form.append(key, String(value));
   });
   if (photos?.photo_front) form.append("photo_front", photos.photo_front);
