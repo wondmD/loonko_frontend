@@ -27,6 +27,7 @@ export interface User {
   farm: number | null;
   farm_name?: string | null;
   is_active_staff_member: boolean;
+  is_superuser: boolean;
   date_joined: string;
 }
 
@@ -44,6 +45,23 @@ export interface Farm {
   auto_milk_income: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface SupervisorFarm {
+  id: number;
+  name: string;
+  location: string;
+  created_at: string;
+  cattle_count: number;
+  user_count: number;
+}
+
+export interface SupervisorAnalytics {
+  total_farms: number;
+  total_users: number;
+  total_cattle: number;
+  total_milk_liters: number;
+  farms: SupervisorFarm[];
 }
 
 export interface CattleLifeStage {

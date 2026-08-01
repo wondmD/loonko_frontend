@@ -27,6 +27,7 @@ import type {
   Treatment,
   User,
   Vaccination,
+  SupervisorAnalytics,
 } from "@/types";
 
 export const authApi = {
@@ -45,6 +46,10 @@ export const authApi = {
   updateStaff: (id: number, payload: Record<string, unknown>) =>
     apiClient.patch<User>(`/auth/staff/${id}/`, payload).then((r) => r.data),
   deleteStaff: (id: number) => apiClient.delete(`/auth/staff/${id}/`),
+  verifyEmail: (payload: { uid: string; token: string }) =>
+    apiClient.post<{ detail: string }>("/auth/verify-email/", payload).then((r) => r.data),
+  setPassword: (payload: { uid: string; token: string; password: string }) =>
+    apiClient.post<{ detail: string }>("/auth/set-password/", payload).then((r) => r.data),
 };
 
 export const farmApi = {
@@ -53,6 +58,8 @@ export const farmApi = {
     apiClient.post<Farm>("/farm/", payload).then((r) => r.data),
   update: (payload: Partial<Farm>) =>
     apiClient.patch<Farm>("/farm/", payload).then((r) => r.data),
+  supervisor: () => 
+    apiClient.get<SupervisorAnalytics>("/farm/supervisor/").then((r) => r.data),
 };
 
 export const cattleApi = {

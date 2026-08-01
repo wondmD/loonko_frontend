@@ -340,15 +340,15 @@ function SettingsContent() {
             {(staff.data ?? []).map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-3"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border px-3 py-3"
               >
-                <div>
-                  <p className="text-sm font-medium">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">
                     {member.first_name} {member.last_name}
                   </p>
-                  <p className="text-xs text-muted-foreground">{member.email}</p>
+                  <p className="truncate text-xs text-muted-foreground">{member.email}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 sm:shrink-0">
                   <Badge>{ROLE_LABELS[member.role]}</Badge>
                   <Button
                     size="sm"

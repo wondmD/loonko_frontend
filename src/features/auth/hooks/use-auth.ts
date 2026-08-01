@@ -51,10 +51,25 @@ export function useAuth() {
 
   const registerMutation = useMutation({
     mutationFn: authApi.register,
-    meta: { successMessage: "Farm account created" },
-    onSuccess: (data) => {
-      setSession(data.user, data.access, data.refresh);
-      router.replace("/dashboard");
+    meta: { successMessage: "Account created! Please check your email." },
+    onSuccess: () => {
+      router.replace("/verify-pending");
+    },
+  });
+
+  const verifyEmailMutation = useMutation({
+    mutationFn: authApi.verifyEmail,
+    meta: { successMessage: "Email verified successfully" },
+    onSuccess: () => {
+      router.replace("/login");
+    },
+  });
+
+  const setPasswordMutation = useMutation({
+    mutationFn: authApi.setPassword,
+    meta: { successMessage: "Password set successfully" },
+    onSuccess: () => {
+      router.replace("/login");
     },
   });
 
@@ -96,6 +111,10 @@ export function useAuth() {
     register: registerMutation.mutateAsync,
     registerError: registerMutation.error as ApiErrorShape | null,
     registerPending: registerMutation.isPending,
+    verifyEmail: verifyEmailMutation.mutateAsync,
+    verifyEmailPending: verifyEmailMutation.isPending,
+    setPassword: setPasswordMutation.mutateAsync,
+    setPasswordPending: setPasswordMutation.isPending,
     updateProfile: updateProfileMutation.mutateAsync,
     updateProfilePending: updateProfileMutation.isPending,
     logout: logoutMutation.mutate,
