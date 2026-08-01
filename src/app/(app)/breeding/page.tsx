@@ -23,9 +23,12 @@ import type { BreedingHerdRow } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
 const eventSchema = Yup.object({
-  dam: Yup.string().required(),
+  dam: Yup.string().required("Select a mother"),
   mating_date: Yup.string().required(),
   method: Yup.string().required(),
+  sire_origin: Yup.string(),
+  sire: Yup.string(),
+  sire_external_id: Yup.string(),
   notes: Yup.string(),
 });
 
@@ -283,6 +286,9 @@ export default function BreedingPage() {
             dam: options[0]?.value || "",
             mating_date: new Date().toISOString().slice(0, 10),
             method: "AI",
+            sire_origin: "NONE",
+            sire: "",
+            sire_external_id: "",
             notes: "",
           }}
           enableReinitialize
@@ -293,6 +299,8 @@ export default function BreedingPage() {
                 dam: Number(values.dam),
                 mating_date: values.mating_date,
                 method: values.method as "AI" | "NATURAL",
+                sire: values.sire ? Number(values.sire) : undefined,
+                sire_external_id: values.sire_external_id || "",
                 notes: values.notes,
               });
               setOpen(false);
@@ -301,7 +309,7 @@ export default function BreedingPage() {
             }
           }}
         >
-          {({ values, errors, touched, handleChange, handleBlur, status }) => (
+          {({ values, errors, touched, handleChange, handleBlur, setFieldValue, status }) => (
             <Form className="space-y-4">
               <Select
                 label={t("cattle.motherTag")}
@@ -331,6 +339,55 @@ export default function BreedingPage() {
                   { label: "Natural", value: "NATURAL" },
                 ]}
               />
+
+              <div className="space-y-3 rounded-xl border border-border p-3">
+                <p className="text-sm font-medium">Bull (Sire) Details</p>
+                <Select
+                  label="Sire origin"
+                  name="sire_origin"
+                  value={values.sire_origin}
+                  onChange={(e) => {
+                    handleChange(e);
+                    setFieldValue("sire", "");
+                    setFieldValue("sire_external_id", "");
+                  }}
+                  onBlur={handleBlur}
+                  options={[
+                    { label: "None / Unknown", value: "NONE" },
+                    { label: "Internal (On Farm)", value: "INTERNAL" },
+                    { label: "External (AI / Other)", value: "EXTERNAL" },
+                  ]}
+                />
+                {values.sire_origin === "INTERNAL" && (
+                  <Select
+                    label="Select Bull"
+                    name="sire"
+                    value={values.sire}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    options={[
+                      { label: "Select…", value: "" },
+                      ...(cattle.list.data?.results
+                        ?.filter((c) => c.sex === "MALE")
+                        .map((c) => ({
+                          label: `${c.tag_id} - ${c.name || "Unnamed"}`,
+                          value: String(c.id),
+                        })) ?? []),
+                    ]}
+                  />
+                )}
+                {values.sire_origin === "EXTERNAL" && (
+                  <Input
+                    label="External Bull ID"
+                    name="sire_external_id"
+                    value={values.sire_external_id}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="e.g. Bull #999"
+                  />
+                )}
+              </div>
+
               <Textarea
                 label={t("cattle.notes")}
                 name="notes"

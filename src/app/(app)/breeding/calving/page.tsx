@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
 import { BREEDING_TABS } from "@/features/breeding/breeding-tabs";
 import { useBreeding } from "@/features/breeding/hooks/use-breeding";
+import { useCattle } from "@/features/cattle/hooks/use-cattle";
 import { useTranslation } from "@/lib/i18n";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -25,6 +26,9 @@ const schema = Yup.object({
   calving_date: Yup.string().required("Calving date is required"),
   calf_tag_id: Yup.string(),
   calf_sex: Yup.string(),
+  calf_sire_origin: Yup.string(),
+  calf_sire: Yup.string(),
+  calf_sire_external_id: Yup.string(),
   complications: Yup.string(),
   notes: Yup.string(),
 });
@@ -35,6 +39,7 @@ export default function CalvingPage() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const breeding = useBreeding();
+  const { list: cattleListQuery } = useCattle({ limit: 1000 });
 
   const pregnancies = breeding.pregnancies.data?.results ?? [];
   const births = breeding.births.data?.results ?? [];
@@ -153,6 +158,9 @@ export default function CalvingPage() {
             calving_date: new Date().toISOString().slice(0, 10),
             calf_tag_id: "",
             calf_sex: "FEMALE",
+            calf_sire_origin: "NONE",
+            calf_sire: "",
+            calf_sire_external_id: "",
             complications: "",
             notes: "",
           }}
@@ -165,6 +173,8 @@ export default function CalvingPage() {
                 calving_date: values.calving_date,
                 calf_tag_id: values.calf_tag_id || "",
                 calf_sex: values.calf_tag_id ? values.calf_sex : "",
+                calf_sire: values.calf_tag_id && values.calf_sire ? Number(values.calf_sire) : undefined,
+                calf_sire_external_id: values.calf_tag_id ? values.calf_sire_external_id : "",
                 complications: values.complications,
                 notes: values.notes,
               });
@@ -174,7 +184,11 @@ export default function CalvingPage() {
             }
           }}
         >
-          {({ values, handleChange, handleBlur, status }) => (
+          {({ values, handleChange, handleBlur, setFieldValue, status }) => {
+            const selectedPreg = duePregnancies.find((p) => String(p.id) === values.pregnancy);
+            const hasSire = selectedPreg && (selectedPreg.sire || selectedPreg.sire_external_id);
+            
+            return (
             <Form className="space-y-4">
               <Select
                 label={t("calvingPage.damPregnancy")}
@@ -218,6 +232,63 @@ export default function CalvingPage() {
                     ]}
                   />
                 ) : null}
+
+                {values.calf_tag_id && hasSire ? (
+                  <div className="rounded-xl border border-border p-3 text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground">Sire tracked automatically</p>
+                    <p>The father is recorded on the original breeding event.</p>
+                  </div>
+                ) : null}
+
+                {values.calf_tag_id && !hasSire ? (
+                  <div className="space-y-3 rounded-xl border border-border p-3">
+                    <p className="text-sm font-medium">Calf Father (Optional)</p>
+                    <Select
+                      label="Sire origin"
+                      name="calf_sire_origin"
+                      value={values.calf_sire_origin}
+                      onChange={(e) => {
+                        handleChange(e);
+                        setFieldValue("calf_sire", "");
+                        setFieldValue("calf_sire_external_id", "");
+                      }}
+                      onBlur={handleBlur}
+                      options={[
+                        { label: "None / Unknown", value: "NONE" },
+                        { label: "Internal (On Farm)", value: "INTERNAL" },
+                        { label: "External (AI / Other)", value: "EXTERNAL" },
+                      ]}
+                    />
+                    {values.calf_sire_origin === "INTERNAL" && (
+                      <Select
+                        label="Select Bull"
+                        name="calf_sire"
+                        value={values.calf_sire}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        options={[
+                          { label: "Select…", value: "" },
+                          ...(cattleListQuery.data?.results
+                            ?.filter((c) => c.sex === "MALE")
+                            .map((c) => ({
+                              label: `${c.tag_id} - ${c.name || "Unnamed"}`,
+                              value: String(c.id),
+                            })) ?? []),
+                        ]}
+                      />
+                    )}
+                    {values.calf_sire_origin === "EXTERNAL" && (
+                      <Input
+                        label="External Bull ID"
+                        name="calf_sire_external_id"
+                        value={values.calf_sire_external_id}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="e.g. Bull #999"
+                      />
+                    )}
+                  </div>
+                ) : null}
               </div>
               <Textarea
                 label={t("calvingPage.complications")}
@@ -239,7 +310,7 @@ export default function CalvingPage() {
                 {t("common.save")}
               </Button>
             </Form>
-          )}
+          )}}
         </Formik>
       </Modal>
     </div>

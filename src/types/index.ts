@@ -366,6 +366,8 @@ export interface Pregnancy {
   expected_calving_date: string | null;
   status: "OPEN" | "PREGNANT" | "CALVED" | "FAILED";
   clinical_notes: string;
+  sire?: number | null;
+  sire_external_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -381,6 +383,8 @@ export interface BirthRecord {
   calf: number | null;
   calf_tag_id: string;
   calf_sex: string;
+  calf_sire?: number;
+  calf_sire_external_id?: string;
   complications: string;
   notes: string;
   created_at: string;

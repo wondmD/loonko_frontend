@@ -57,6 +57,9 @@ const schema = Yup.object({
   father_origin: Yup.string(),
   father: Yup.string(),
   father_external_id: Yup.string(),
+  insemination_sire_origin: Yup.string(),
+  insemination_sire: Yup.string(),
+  insemination_sire_external_id: Yup.string(),
 });
 
 export function AddCattleModal({
@@ -128,6 +131,9 @@ export function AddCattleModal({
           father_origin: "NONE", // NONE, INTERNAL, EXTERNAL
           father: "",
           father_external_id: "",
+          insemination_sire_origin: "NONE", // NONE, INTERNAL, EXTERNAL
+          insemination_sire: "",
+          insemination_sire_external_id: "",
         }}
         validationSchema={schema}
         onSubmit={async (values, helpers) => {
@@ -453,6 +459,52 @@ export function AddCattleModal({
                             { label: t("cattle.form.methodNatural"), value: "NATURAL" },
                           ]}
                         />
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <Select
+                          label="Bull (Sire) origin"
+                          name="insemination_sire_origin"
+                          value={values.insemination_sire_origin}
+                          onChange={(e) => {
+                            handleChange(e);
+                            setFieldValue("insemination_sire", "");
+                            setFieldValue("insemination_sire_external_id", "");
+                          }}
+                          onBlur={handleBlur}
+                          options={[
+                            { label: "None / Unknown", value: "NONE" },
+                            { label: "Internal (On Farm)", value: "INTERNAL" },
+                            { label: "External (AI / Other)", value: "EXTERNAL" },
+                          ]}
+                        />
+                        {values.insemination_sire_origin === "INTERNAL" && (
+                          <Select
+                            label="Select Bull"
+                            name="insemination_sire"
+                            value={values.insemination_sire}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            options={[
+                              { label: "Select…", value: "" },
+                              ...(cattleListQuery.data?.results
+                                ?.filter((c) => c.sex === "MALE")
+                                .map((c) => ({
+                                  label: `${c.tag_id} - ${c.name || "Unnamed"}`,
+                                  value: String(c.id),
+                                })) ?? []),
+                            ]}
+                          />
+                        )}
+                        {values.insemination_sire_origin === "EXTERNAL" && (
+                          <Input
+                            label="External Bull ID"
+                            name="insemination_sire_external_id"
+                            value={values.insemination_sire_external_id}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            placeholder="e.g. Bull #999"
+                          />
+                        )}
                       </div>
                       {expectedCalving ? (
                         <p className="text-xs text-muted-foreground">
