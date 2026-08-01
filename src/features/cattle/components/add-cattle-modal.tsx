@@ -54,6 +54,9 @@ const schema = Yup.object({
   mother_origin: Yup.string(),
   mother: Yup.string(),
   mother_external_id: Yup.string(),
+  father_origin: Yup.string(),
+  father: Yup.string(),
+  father_external_id: Yup.string(),
 });
 
 export function AddCattleModal({
@@ -64,7 +67,7 @@ export function AddCattleModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const { create, list: cattleListQuery } = useCattle({ limit: 1000, sex: "FEMALE" });
+  const { create, list: cattleListQuery } = useCattle({ limit: 1000 }); // Remove sex="FEMALE" so we can pick bulls too
   const settings = useQuery({
     queryKey: ["husbandry", "settings"],
     queryFn: husbandryApi.settings,
@@ -122,6 +125,9 @@ export function AddCattleModal({
           mother_origin: "NONE", // NONE, INTERNAL, EXTERNAL
           mother: "",
           mother_external_id: "",
+          father_origin: "NONE", // NONE, INTERNAL, EXTERNAL
+          father: "",
+          father_external_id: "",
         }}
         validationSchema={schema}
         onSubmit={async (values, helpers) => {
@@ -158,6 +164,12 @@ export function AddCattleModal({
               payload.mother = Number(values.mother);
             } else if (values.mother_origin === "EXTERNAL" && values.mother_external_id) {
               payload.mother_external_id = values.mother_external_id;
+            }
+
+            if (values.father_origin === "INTERNAL" && values.father) {
+              payload.father = Number(values.father);
+            } else if (values.father_origin === "EXTERNAL" && values.father_external_id) {
+              payload.father_external_id = values.father_external_id;
             }
 
             if (breedingReady) {
@@ -308,48 +320,99 @@ export function AddCattleModal({
 
               <div className="space-y-3 rounded-xl border border-border p-3">
                 <p className="text-sm font-semibold">{t("cattle.pedigree.title")}</p>
-                <Select
-                  label={t("cattle.pedigree.motherOrigin")}
-                  name="mother_origin"
-                  value={values.mother_origin}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setFieldValue("mother", "");
-                    setFieldValue("mother_external_id", "");
-                  }}
-                  onBlur={handleBlur}
-                  options={[
-                    { label: t("cattle.pedigree.originUnknown"), value: "NONE" },
-                    { label: t("cattle.pedigree.originInternal"), value: "INTERNAL" },
-                    { label: t("cattle.pedigree.originExternal"), value: "EXTERNAL" },
-                  ]}
-                />
-                {values.mother_origin === "INTERNAL" ? (
+                <div className="grid gap-3 sm:grid-cols-2">
                   <Select
-                    label={t("cattle.pedigree.selectMother")}
-                    name="mother"
-                    value={values.mother}
-                    onChange={handleChange}
+                    label={t("cattle.pedigree.motherOrigin")}
+                    name="mother_origin"
+                    value={values.mother_origin}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setFieldValue("mother", "");
+                      setFieldValue("mother_external_id", "");
+                    }}
                     onBlur={handleBlur}
                     options={[
-                      { label: "Select…", value: "" },
-                      ...(cattleListQuery.data?.results ?? []).map((c) => ({
-                        label: `${c.tag_id} - ${c.name || c.breed || "Cow"}`,
-                        value: String(c.id),
-                      })),
+                      { label: t("cattle.pedigree.originUnknown"), value: "NONE" },
+                      { label: t("cattle.pedigree.originInternal"), value: "INTERNAL" },
+                      { label: t("cattle.pedigree.originExternal"), value: "EXTERNAL" },
                     ]}
                   />
-                ) : null}
-                {values.mother_origin === "EXTERNAL" ? (
-                  <Input
-                    label={t("cattle.pedigree.externalMotherInfo")}
-                    name="mother_external_id"
-                    value={values.mother_external_id}
-                    onChange={handleChange}
+                  {values.mother_origin === "INTERNAL" && (
+                    <Select
+                      label={t("cattle.form.selectMother")}
+                      name="mother"
+                      value={values.mother}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      options={[
+                        { label: "Select…", value: "" },
+                        ...(cattleListQuery.data?.results
+                          ?.filter(c => c.sex === "FEMALE" && c.life_stage?.category !== "CALF")
+                          .map((c) => ({
+                            label: `${c.tag_id} - ${c.name || "Unnamed"}`,
+                            value: String(c.id),
+                          })) ?? []),
+                      ]}
+                    />
+                  )}
+                  {values.mother_origin === "EXTERNAL" && (
+                    <Input
+                      label={t("cattle.form.motherExternalId")}
+                      name="mother_external_id"
+                      value={values.mother_external_id}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="e.g. Farm X - Tag 999"
+                    />
+                  )}
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Select
+                    label="Father (Sire) origin"
+                    name="father_origin"
+                    value={values.father_origin}
+                    onChange={(e) => {
+                      handleChange(e);
+                      setFieldValue("father", "");
+                      setFieldValue("father_external_id", "");
+                    }}
                     onBlur={handleBlur}
-                    placeholder="e.g. Tag 4012"
+                    options={[
+                      { label: "None", value: "NONE" },
+                      { label: "Internal (On Farm)", value: "INTERNAL" },
+                      { label: "External (AI / Other)", value: "EXTERNAL" },
+                    ]}
                   />
-                ) : null}
+                  {values.father_origin === "INTERNAL" && (
+                    <Select
+                      label="Select Sire"
+                      name="father"
+                      value={values.father}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      options={[
+                        { label: "Select…", value: "" },
+                        ...(cattleListQuery.data?.results
+                          ?.filter(c => c.sex === "MALE")
+                          .map((c) => ({
+                            label: `${c.tag_id} - ${c.name || "Unnamed"}`,
+                            value: String(c.id),
+                          })) ?? []),
+                      ]}
+                    />
+                  )}
+                  {values.father_origin === "EXTERNAL" && (
+                    <Input
+                      label="External Bull ID"
+                      name="father_external_id"
+                      value={values.father_external_id}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="e.g. Sire #12345"
+                    />
+                  )}
+                </div>
               </div>
 
               {showRepro ? (

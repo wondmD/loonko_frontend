@@ -75,8 +75,8 @@
   --color-danger: var(--danger);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
-  --font-sans: var(--font-sans-next), "Segoe UI", sans-serif;
-  --font-display: var(--font-display-next), "Segoe UI", sans-serif;
+  --font-sans: "Inter", "Segoe UI", sans-serif;
+  --font-display: "Outfit", "Segoe UI", sans-serif;
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);

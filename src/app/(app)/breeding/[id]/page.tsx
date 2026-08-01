@@ -21,6 +21,7 @@ import {
   useBreeding,
   useBreedingCattleHistory,
 } from "@/features/breeding/hooks/use-breeding";
+import { useCattle } from "@/features/cattle/hooks/use-cattle";
 import { useAuthStore } from "@/stores/auth-store";
 
 import { useTranslation } from "@/lib/i18n";
@@ -28,6 +29,9 @@ import { useTranslation } from "@/lib/i18n";
 const eventSchema = Yup.object({
   mating_date: Yup.string().required(),
   method: Yup.string().required(),
+  sire_origin: Yup.string(),
+  sire: Yup.string(),
+  sire_external_id: Yup.string(),
   notes: Yup.string(),
 });
 
@@ -64,6 +68,7 @@ export default function BreedingCattleDetailPage({
   const [open, setOpen] = useState(false);
   const history = useBreedingCattleHistory(cattleId);
   const breeding = useBreeding();
+  const { list: cattleListQuery } = useCattle({ limit: 1000 });
   const data = history.data;
 
   if (history.isLoading) return <LoadingState />;
@@ -255,17 +260,26 @@ export default function BreedingCattleDetailPage({
           initialValues={{
             mating_date: new Date().toISOString().slice(0, 10),
             method: "AI",
+            sire_origin: "NONE",
+            sire: "",
+            sire_external_id: "",
             notes: "",
           }}
           validationSchema={eventSchema}
           onSubmit={async (values, helpers) => {
             try {
-              await breeding.createEvent.mutateAsync({
+              const payload: Record<string, string | number> = {
                 dam: cattleId,
                 mating_date: values.mating_date,
                 method: values.method as "AI" | "NATURAL",
                 notes: values.notes,
-              });
+              };
+              if (values.sire_origin === "INTERNAL" && values.sire) {
+                payload.sire = Number(values.sire);
+              } else if (values.sire_origin === "EXTERNAL" && values.sire_external_id) {
+                payload.sire_external_id = values.sire_external_id;
+              }
+              await breeding.createEvent.mutateAsync(payload);
               setOpen(false);
               history.refetch();
             } catch (error) {
@@ -273,7 +287,7 @@ export default function BreedingCattleDetailPage({
             }
           }}
         >
-          {({ values, handleChange, handleBlur, status }) => (
+          {({ values, handleChange, handleBlur, setFieldValue, status }) => (
             <Form className="space-y-4">
               <Input
                 label={t("breedingDetail.matingDate")}
@@ -294,6 +308,54 @@ export default function BreedingCattleDetailPage({
                   { label: t("breedingDetail.natural"), value: "NATURAL" },
                 ]}
               />
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Select
+                  label="Sire origin"
+                  name="sire_origin"
+                  value={values.sire_origin}
+                  onChange={(e) => {
+                    handleChange(e);
+                    setFieldValue("sire", "");
+                    setFieldValue("sire_external_id", "");
+                  }}
+                  onBlur={handleBlur}
+                  options={[
+                    { label: "None", value: "NONE" },
+                    { label: "Internal (On Farm)", value: "INTERNAL" },
+                    { label: "External (AI / Other)", value: "EXTERNAL" },
+                  ]}
+                />
+                {values.sire_origin === "INTERNAL" && (
+                  <Select
+                    label="Select Sire"
+                    name="sire"
+                    value={values.sire}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    options={[
+                      { label: "Select…", value: "" },
+                      ...(cattleListQuery.data?.results
+                        ?.filter(c => c.sex === "MALE")
+                        .map((c) => ({
+                          label: `${c.tag_id} - ${c.name || "Unnamed"}`,
+                          value: String(c.id),
+                        })) ?? []),
+                    ]}
+                  />
+                )}
+                {values.sire_origin === "EXTERNAL" && (
+                  <Input
+                    label="External Bull ID"
+                    name="sire_external_id"
+                    value={values.sire_external_id}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="e.g. Sire #12345"
+                  />
+                )}
+              </div>
+
               <Textarea
                 label={t("cattle.notes")}
                 name="notes"

@@ -2,11 +2,7 @@ import type { Metadata } from "next";
 
 import { AppProviders } from "@/providers/app-providers";
 
-import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans-next" });
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-display-next" });
 
 export const metadata: Metadata = {
   title: "Loonkoo — Dairy Farm Tracker",
@@ -19,7 +15,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`h-full ${inter.variable} ${outfit.variable}`}>
+    <html lang="en" className="h-full">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+      </head>
       <body className="min-h-full font-sans antialiased">
         <AppProviders>{children}</AppProviders>
       </body>

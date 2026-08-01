@@ -1,35 +1,22 @@
 "use client";
 
-import { Form, Formik } from "formik";
 import { ChevronRight, Milk as MilkIcon, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import * as Yup from "yup";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Modal } from "@/components/ui/modal";
 import { ModuleTabs } from "@/components/ui/module-tabs";
 import { PageHeader } from "@/components/ui/page-header";
-import { Select } from "@/components/ui/select";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
-import { Textarea } from "@/components/ui/textarea";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
-import { useCattle } from "@/features/cattle/hooks/use-cattle";
 import { useMilk } from "@/features/milk/hooks/use-milk";
 import { canAccess } from "@/lib/auth/access";
 import { formatLiters } from "@/lib/utils/cn";
 import { useAuthStore } from "@/stores/auth-store";
 
-const schema = Yup.object({
-  cattle: Yup.string().required("Select cattle"),
-  date: Yup.string().required("Date is required"),
-  morning_liters: Yup.number().min(0).required(),
-  evening_liters: Yup.number().min(0).required(),
-  notes: Yup.string(),
-});
+
 
 function formatShortDate(value: string | null | undefined) {
   if (!value) return "—";
@@ -51,16 +38,8 @@ export default function MilkPage() {
   const role = useAuthStore((s) => s.user?.role);
   const { t } = useTranslation();
   const canWrite = canAccess(role, "milkWrite");
-  const [open, setOpen] = useState(false);
   const milk = useMilk();
-  const cattle = useCattle({ status: "ACTIVE", herd_filter: "milking" });
   const rows = milk.herd.data?.results ?? [];
-
-  const cattleOptions =
-    cattle.list.data?.results.map((c) => ({
-      label: `${c.tag_id}${c.name ? ` — ${c.name}` : ""}`,
-      value: String(c.id),
-    })) ?? [];
 
   return (
     <div>
@@ -72,14 +51,11 @@ export default function MilkPage() {
             <div className="flex flex-wrap gap-2">
               <Link
                 href="/milk/new"
-                className="inline-flex h-11 items-center rounded-xl border border-border bg-card px-4 text-sm font-medium"
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-transparent bg-primary px-4 text-sm font-medium text-primary-foreground shadow-[var(--shadow-sm)] hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
+                <Plus className="mr-2 h-4 w-4" />
                 {t("milk.logMilk")}
               </Link>
-              <Button onClick={() => setOpen(true)}>
-                <Plus className="h-4 w-4" />
-                {t("milk.logNewYield")}
-              </Button>
             </div>
           ) : null
         }
@@ -185,88 +161,6 @@ export default function MilkPage() {
           </div>
         </div>
       ) : null}
-
-      <Modal open={open} onClose={() => setOpen(false)} title={t("milk.logNewYield")}>
-        <Formik
-          initialValues={{
-            cattle: cattleOptions[0]?.value || "",
-            date: new Date().toISOString().slice(0, 10),
-            morning_liters: 0,
-            evening_liters: 0,
-            notes: "",
-          }}
-          enableReinitialize
-          validationSchema={schema}
-          onSubmit={async (values, helpers) => {
-            try {
-              await milk.create.mutateAsync({
-                cattle: Number(values.cattle),
-                date: values.date,
-                morning_liters: String(values.morning_liters),
-                evening_liters: String(values.evening_liters),
-                notes: values.notes,
-              });
-              setOpen(false);
-            } catch (error) {
-              helpers.setStatus(getMutationError(error).message);
-            }
-          }}
-        >
-          {({ values, errors, touched, handleChange, handleBlur, status }) => (
-            <Form className="space-y-4">
-              <Select
-                label={t("cattle.title")}
-                name="cattle"
-                value={values.cattle}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                options={[{ label: "Select…", value: "" }, ...cattleOptions]}
-                error={touched.cattle ? errors.cattle : undefined}
-              />
-              <Input
-                label="Date"
-                name="date"
-                type="date"
-                value={values.date}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.date ? errors.date : undefined}
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  label={t("milk.morningYield")}
-                  name="morning_liters"
-                  type="number"
-                  step="0.1"
-                  value={values.morning_liters}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-                <Input
-                  label={t("milk.eveningYield")}
-                  name="evening_liters"
-                  type="number"
-                  step="0.1"
-                  value={values.evening_liters}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                />
-              </div>
-              <Textarea
-                label={t("cattle.notes")}
-                name="notes"
-                value={values.notes}
-                onChange={handleChange}
-                onBlur={handleBlur}
-              />
-              {status ? <p className="text-sm text-danger">{status}</p> : null}
-              <Button type="submit" className="w-full" loading={milk.create.isPending}>
-                {t("common.save")}
-              </Button>
-            </Form>
-          )}
-        </Formik>
-      </Modal>
     </div>
   );
 }
