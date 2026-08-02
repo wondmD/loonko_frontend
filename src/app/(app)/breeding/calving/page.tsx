@@ -202,9 +202,11 @@ export default function CalvingPage() {
                 label={t("calvingPage.calvingDate")}
                 name="calving_date"
                 type="date"
+                max={new Date().toISOString().slice(0, 10)}
                 value={values.calving_date}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                hint="Must be at least 9 months (270 days) from dam's previous calving."
               />
               <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-3">
                 <p className="text-sm font-medium">{t("calvingPage.newCalfOptional")}</p>

@@ -49,7 +49,7 @@ const schema = Yup.object({
   is_pregnant: Yup.string(),
   insemination_date: Yup.string(),
   breeding_method: Yup.string(),
-  previous_calvings: Yup.number().min(0).max(20),
+  has_calved: Yup.string(),
   last_calving_date: Yup.string(),
   mother_origin: Yup.string(),
   mother: Yup.string(),
@@ -123,7 +123,7 @@ export function AddCattleModal({
           is_pregnant: "",
           insemination_date: "",
           breeding_method: "AI",
-          previous_calvings: 0,
+          has_calved: "",
           last_calving_date: "",
           mother_origin: "NONE", // NONE, INTERNAL, EXTERNAL
           mother: "",
@@ -180,12 +180,15 @@ export function AddCattleModal({
 
             if (breedingReady) {
               payload.is_pregnant = values.is_pregnant === "true";
-              payload.previous_calvings = Number(values.previous_calvings) || 0;
               if (values.is_pregnant === "true") {
                 payload.insemination_date = values.insemination_date;
                 payload.breeding_method = values.breeding_method;
-              }
-              if (Number(values.previous_calvings) > 0 && values.last_calving_date) {
+                if (values.insemination_sire_origin === "INTERNAL" && values.insemination_sire) {
+                  payload.insemination_sire = Number(values.insemination_sire);
+                } else if (values.insemination_sire_origin === "EXTERNAL" && values.insemination_sire_external_id) {
+                  payload.insemination_sire_external_id = values.insemination_sire_external_id;
+                }
+              } else if (values.has_calved === "true" && values.last_calving_date) {
                 payload.last_calving_date = values.last_calving_date;
               }
             }
@@ -292,7 +295,7 @@ export function AddCattleModal({
                     handleChange(e);
                     setFieldValue("is_pregnant", "");
                     setFieldValue("insemination_date", "");
-                    setFieldValue("previous_calvings", 0);
+                    setFieldValue("has_calved", "");
                     setFieldValue("last_calving_date", "");
                   }}
                   onBlur={handleBlur}
@@ -310,7 +313,7 @@ export function AddCattleModal({
                     handleChange(e);
                     setFieldValue("is_pregnant", "");
                     setFieldValue("insemination_date", "");
-                    setFieldValue("previous_calvings", 0);
+                    setFieldValue("has_calved", "");
                     setFieldValue("last_calving_date", "");
                   }}
                   onBlur={handleBlur}
@@ -512,42 +515,40 @@ export function AddCattleModal({
                           {gestationDays}-{t("cattle.form.gestation")}).
                         </p>
                       ) : null}
-                      <Input
-                        label={t("cattle.form.prevCalvesBeforePreg")}
-                        name="previous_calvings"
-                        type="number"
-                        min={0}
-                        max={20}
-                        value={String(values.previous_calvings)}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
                     </>
                   ) : null}
 
                   {values.is_pregnant === "false" ? (
-                    <Input
-                      label={t("cattle.form.prevCalvings")}
-                      name="previous_calvings"
-                      type="number"
-                      min={0}
-                      max={20}
-                      value={String(values.previous_calvings)}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                    />
-                  ) : null}
-
-                  {Number(values.previous_calvings) > 0 ? (
-                    <Input
-                      label={t("cattle.form.recentCalvingDate")}
-                      name="last_calving_date"
-                      type="date"
-                      value={values.last_calving_date}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      hint={t("cattle.form.recentCalvingHint")}
-                    />
+                    <>
+                      <Select
+                        label="Has this cow calved before?"
+                        name="has_calved"
+                        value={values.has_calved}
+                        onChange={(e) => {
+                          handleChange(e);
+                          if (e.target.value !== "true") {
+                            setFieldValue("last_calving_date", "");
+                          }
+                        }}
+                        onBlur={handleBlur}
+                        options={[
+                          { label: "Select…", value: "" },
+                          { label: "Yes (has previous calving record)", value: "true" },
+                          { label: "No (never calved / virgin heifer)", value: "false" },
+                        ]}
+                      />
+                      {values.has_calved === "true" ? (
+                        <Input
+                          label={t("cattle.form.recentCalvingDate")}
+                          name="last_calving_date"
+                          type="date"
+                          value={values.last_calving_date}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          hint={t("cattle.form.recentCalvingHint")}
+                        />
+                      ) : null}
+                    </>
                   ) : null}
                 </div>
               ) : null}
