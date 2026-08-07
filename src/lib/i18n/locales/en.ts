@@ -34,7 +34,17 @@ export const en = {
     VETERINARIAN: "Specialized access to health logs, vaccinations, and breeding records.",
   },
 
+  pagination: {
+    showing: "Showing {from}–{to} of {total}",
+    previous: "Previous",
+    next: "Next",
+    perPage: "Per page",
+    all: "All",
+  },
+
   common: {
+    complete: "Complete",
+    skip: "Skip",
     save: "Save",
     cancel: "Cancel",
     delete: "Delete",
@@ -198,7 +208,12 @@ export const en = {
       sale_price: "Sale Price",
       sale_date: "Sale Date",
       reason: "Reason (Optional)",
-      reason_placeholder: "e.g. Mastitis, Low Fertility"
+      reason_placeholder: "e.g. Mastitis, Low Fertility",
+      deleteCattle: "Remove Cattle",
+      deleteConfirmTitle: "Remove animal from system?",
+      deleteConfirmDesc: "Are you sure you want to permanently remove this animal from the herd? All associated records will also be deleted. This action cannot be undone.",
+      deleteConfirmButton: "Yes, Delete Animal",
+      deletedSuccess: "Animal removed successfully from herd."
     },
     breeds: {
       holstein: "Holstein Friesian",
@@ -212,6 +227,7 @@ export const en = {
       other: "Other"
     },
     form: {
+      motherExternalId: "Mother External ID",
       addAnimal: "Add animal",
       photosRequired: "Photos (required)",
       front: "Front",
@@ -256,6 +272,7 @@ export const en = {
   },
 
   milk: {
+    milkLogs: "Milk Logs",
     title: "Milk Production",
     subtitle: "Record daily morning and evening milk yields and quality.",
     logYield: "Record Milk Yield",
@@ -281,6 +298,11 @@ export const en = {
   },
 
   health: {
+    noTreatments: "No treatments recorded.",
+    noVaccinations: "No vaccinations recorded.",
+    records: "Health Records",
+    treatments: "Treatments",
+    vaccine: "Vaccine",
     title: "Health & Care",
     subtitle: "Monitor treatments, vaccinations, and veterinary visits.",
     vaccinations: "Vaccinations",
@@ -360,6 +382,9 @@ export const en = {
     medium: "Medium",
     low: "Low / Info",
     markRead: "Mark as read",
+    markAsRead: "Mark as read",
+    refreshAlerts: "Refresh Alerts",
+    acknowledge: "Acknowledge",
     noAlerts: "No alerts at this time.",
     markAllRead: "Mark All as Read",
     noUnreadAlerts: "No unread alerts",
@@ -464,6 +489,11 @@ export const en = {
   },
 
   calvingPage: {
+    calvingDate: "Calving Date",
+    damPregnancy: "Dam Pregnancy",
+    newCalfHint: "New Calf Details",
+    noCalvingsYet: "No calvings recorded yet.",
+    noPregnanciesReadyHint: "No pregnancies ready for calving.",
     title: "Calving",
     subtitle: "Record births, register calves, and review calving history.",
     recordCalving: "Record calving",
@@ -479,6 +509,10 @@ export const en = {
   },
 
   feedPage: {
+    cattleOptional: "Cattle (Optional)",
+    costOptional: "Cost (Optional)",
+    noFeedLogsHint: "No feed logs available.",
+    wholeHerd: "Whole Herd",
     title: "Feed Log",
     subtitle: "Feed given to the herd. Optional cost posts to Finance.",
     logFeed: "Log feed",

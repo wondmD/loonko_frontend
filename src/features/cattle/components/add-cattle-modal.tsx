@@ -15,6 +15,7 @@ import { useTranslation } from "@/lib/i18n";
 import { PhotoUploadField } from "@/features/cattle/components/cattle-photo";
 import { buildCattleFormData, useCattle } from "@/features/cattle/hooks/use-cattle";
 import { husbandryApi } from "@/lib/api/services";
+import { formatAge } from "@/lib/utils/format-age";
 
 type PhotoSet = {
   photo_front: File | null;
@@ -29,14 +30,6 @@ function ageDaysFromDob(dob: string): number | null {
   const today = new Date();
   const ms = today.getTime() - born.getTime();
   return Math.floor(ms / (1000 * 60 * 60 * 24));
-}
-
-function formatAge(days: number | null) {
-  if (days == null) return null;
-  if (days < 60) return `${days} days old`;
-  const months = Math.floor(days / 30.4);
-  if (months < 24) return `~${months} months old`;
-  return `~${(days / 365).toFixed(1)} years old`;
 }
 
 const schema = Yup.object({
@@ -69,7 +62,7 @@ export function AddCattleModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const { t } = useTranslation();
+  const { language, t } = useTranslation();
   const { create, list: cattleListQuery } = useCattle({ limit: 1000 }); // Remove sex="FEMALE" so we can pick bulls too
   const settings = useQuery({
     queryKey: ["husbandry", "settings"],
@@ -202,7 +195,7 @@ export function AddCattleModal({
       >
         {({ values, errors, touched, handleChange, handleBlur, setFieldValue, status }) => {
           const age = ageDaysFromDob(values.date_of_birth);
-          const ageLabel = formatAge(age);
+          const ageLabel = values.date_of_birth ? formatAge(values.date_of_birth, age, language) : null;
           const isFemale = values.sex === "FEMALE";
           const isCalf = isFemale && age != null && age < weaningDays;
           const breedingReady = isFemale && (age == null || age >= firstBreedingAge);

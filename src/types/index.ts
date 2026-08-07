@@ -122,6 +122,8 @@ export interface Cattle {
   photo_front_url: string | null;
   photo_left_url: string | null;
   photo_right_url: string | null;
+  age_days?: number | null;
+  age_display?: string | null;
   life_stage?: CattleLifeStage;
   lactation?: CattleLactation;
   next_event?: CattleUpcomingEvent | null;

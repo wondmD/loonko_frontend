@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { CalendarClock, Droplets, HeartPulse, History, Pencil } from "lucide-react";
+import { CalendarClock, Droplets, HeartPulse, History, Pencil, Trash2 } from "lucide-react";
 import { use, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import { buildCattleFormData, useCattle, useCattleDetail } from "@/features/catt
 import { HusbandryTaskRow } from "@/features/husbandry/components/husbandry-task-row";
 import { canAccess } from "@/lib/auth/access";
 import { formatLiters } from "@/lib/utils/cn";
+import { formatAge } from "@/lib/utils/format-age";
 import { useAuthStore } from "@/stores/auth-store";
 
 import { useTranslation } from "@/lib/i18n";
@@ -35,16 +37,18 @@ export default function CattleDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const router = useRouter();
   const { id } = use(params);
   const cattleId = Number(id);
   const role = useAuthStore((s) => s.user?.role);
   const canWrite = canAccess(role, "cattleWrite");
   const canEditProfile = role === "OWNER";
   const { data, isLoading, isError, refetch } = useCattleDetail(cattleId);
-  const { update } = useCattle();
+  const { update, remove } = useCattle();
   const { language, t } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [activePhoto, setActivePhoto] = useState<{ src: string; label: string } | null>(null);
   const [photoDrafts, setPhotoDrafts] = useState<{
@@ -63,12 +67,7 @@ export default function CattleDetailPage({
     return <ErrorState message="Could not load cattle." onRetry={() => refetch()} />;
   }
 
-  const ageLabel =
-    data.age_days == null
-      ? "—"
-      : data.age_days < 60
-        ? `${data.age_days}d`
-        : `${(data.age_days / 30.4).toFixed(0)} mo`;
+  const ageLabel = formatAge(data.date_of_birth, data.age_days, language);
 
   const animalClass = data.husbandry_plan?.animal_class || data.life_stage;
 
@@ -79,7 +78,7 @@ export default function CattleDetailPage({
         description={data.name || t("cattleDetail.eyebrow")}
         actions={
           canEditProfile ? (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="secondary"
                 size="sm"
@@ -95,6 +94,14 @@ export default function CattleDetailPage({
                 <Pencil className="mr-2 h-4 w-4" />
                 {t("common.edit")}
               </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => setDeleteOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                {t("cattle.status_change.deleteCattle")}
+              </Button>
             </div>
           ) : null
         }
@@ -106,6 +113,7 @@ export default function CattleDetailPage({
           onClose={() => setEditOpen(false)}
           cattle={data}
           onSaved={() => refetch()}
+          onDelete={() => setDeleteOpen(true)}
         />
       ) : null}
 
@@ -117,6 +125,48 @@ export default function CattleDetailPage({
           currentStatus={data.status}
         />
       ) : null}
+
+      <Modal
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        title={t("cattle.status_change.deleteConfirmTitle")}
+        className="sm:max-w-md"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            {t("cattle.status_change.deleteConfirmDesc")}
+          </p>
+          <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-sm text-destructive font-medium">
+            {data.tag_id} {data.name ? `— ${data.name}` : ""}
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setDeleteOpen(false)}
+              disabled={remove.isPending}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              loading={remove.isPending}
+              onClick={async () => {
+                try {
+                  await remove.mutateAsync(cattleId);
+                  setDeleteOpen(false);
+                  router.push("/cattle");
+                } catch (err) {
+                  console.error(err);
+                }
+              }}
+            >
+              {t("cattle.status_change.deleteConfirmButton")}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <div className="w-full max-w-full overflow-hidden">
         <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -348,7 +398,10 @@ export default function CattleDetailPage({
           <Info label={t("cattle.breed")} value={data.breed || "—"} />
           {data.sex === "MALE" ? <Info label={t("cattleDetail.gender")} value={t("cattle.male")} /> : null}
           <Info label={t("cattleDetail.lifeStage")} value={data.life_stage?.label || "—"} />
-          <Info label={t("cattle.dob")} value={data.date_of_birth || "—"} />
+          <Info 
+            label={t("cattle.dob")} 
+            value={data.date_of_birth ? `${data.date_of_birth} (${ageLabel})` : "—"} 
+          />
           <Info label={t("cattleDetail.lastCalving")} value={data.lactation.last_calving_date || "—"} />
           <Info
             label={t("breeding.pregnancyStatus")}

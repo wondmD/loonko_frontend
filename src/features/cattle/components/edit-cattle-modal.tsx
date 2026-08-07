@@ -3,6 +3,7 @@
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
 
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
@@ -11,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
 import { buildCattleFormData, useCattle } from "@/features/cattle/hooks/use-cattle";
 import { useTranslation } from "@/lib/i18n";
+import { formatAge } from "@/lib/utils/format-age";
 import type { CattleDetail } from "@/types";
 
 const schema = Yup.object({
@@ -30,13 +32,15 @@ export function EditCattleModal({
   onClose,
   cattle,
   onSaved,
+  onDelete,
 }: {
   open: boolean;
   onClose: () => void;
   cattle: CattleDetail;
   onSaved: () => void;
+  onDelete?: () => void;
 }) {
-  const { t } = useTranslation();
+  const { language, t } = useTranslation();
   const { update } = useCattle();
 
   return (
@@ -144,7 +148,11 @@ export function EditCattleModal({
               value={values.date_of_birth}
               onChange={handleChange}
               onBlur={handleBlur}
-              hint={t("cattle.form.dobHint")}
+              hint={
+                values.date_of_birth
+                  ? `${t("cattle.form.dobHint")} · ${formatAge(values.date_of_birth, undefined, language)}`
+                  : t("cattle.form.dobHint")
+              }
             />
             <Textarea
               label={t("cattle.form.notes")}
@@ -154,13 +162,29 @@ export function EditCattleModal({
               onBlur={handleBlur}
             />
             {status ? <p className="text-sm text-danger">{status}</p> : null}
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={onClose}>
-                {t("common.cancel")}
-              </Button>
-              <Button type="submit" loading={update.isPending}>
-                {t("cattle.form.saveAnimal")}
-              </Button>
+            <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
+              {onDelete ? (
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    onDelete();
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {t("cattle.status_change.deleteCattle")}
+                </Button>
+              ) : <div />}
+              <div className="flex gap-2">
+                <Button type="button" variant="secondary" onClick={onClose}>
+                  {t("common.cancel")}
+                </Button>
+                <Button type="submit" loading={update.isPending}>
+                  {t("cattle.form.saveAnimal")}
+                </Button>
+              </div>
             </div>
           </Form>
         )}

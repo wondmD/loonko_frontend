@@ -16,6 +16,7 @@ import { useCattle } from "@/features/cattle/hooks/use-cattle";
 import { cattleApi } from "@/lib/api/services";
 import { canAccess } from "@/lib/auth/access";
 import { cn } from "@/lib/utils/cn";
+import { formatAgeShort } from "@/lib/utils/format-age";
 import { useAuthStore } from "@/stores/auth-store";
 
 import { useTranslation } from "@/lib/i18n";
@@ -41,6 +42,8 @@ export default function CattlePage() {
   const [category, setCategory] = useState<CategoryTab>("ALL");
   const [herdFilter, setHerdFilter] = useState("");
   const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number | "ALL">(20);
 
   const categoryTabs: Array<{ key: CategoryTab; label: string }> = [
     { key: "ALL", label: t("cattle.allStatuses") },
@@ -50,12 +53,14 @@ export default function CattlePage() {
   ];
 
   const listParams = useMemo(() => {
-    const params: Record<string, string> = {};
+    const params: Record<string, string | number> = {};
     if (search) params.search = search;
     if (category && category !== "ALL") params.category = category;
     if (herdFilter) params.herd_filter = herdFilter;
+    params.page = page;
+    params.page_size = pageSize === "ALL" ? 1000 : pageSize;
     return params;
-  }, [search, category, herdFilter]);
+  }, [search, category, herdFilter, page, pageSize]);
 
   const { list } = useCattle(listParams);
   const facets = useQuery({
@@ -93,7 +98,10 @@ export default function CattlePage() {
               <button
                 key={tab.key}
                 type="button"
-                onClick={() => setCategory(tab.key)}
+                onClick={() => {
+                  setCategory(tab.key);
+                  setPage(1);
+                }}
                 className={cn(
                   "inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-medium transition sm:flex-none",
                   active
@@ -115,7 +123,10 @@ export default function CattlePage() {
             <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               placeholder={t("cattle.searchPlaceholder")}
               className="h-10 w-full rounded-xl border border-border bg-card pr-3 pl-10 text-sm"
             />
@@ -124,7 +135,10 @@ export default function CattlePage() {
             <Select
               name="herd_filter"
               value={herdFilter}
-              onChange={(e) => setHerdFilter(e.target.value)}
+              onChange={(e) => {
+                setHerdFilter(e.target.value);
+                setPage(1);
+              }}
               options={STATUS_FILTERS.map((f) => ({
                 label: f.label,
                 value: f.key,
@@ -192,6 +206,9 @@ export default function CattlePage() {
               <div className="space-y-2 p-3.5">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <Badge tone="accent">{stage}</Badge>
+                  {cow.date_of_birth ? (
+                    <Badge tone="default">{formatAgeShort(cow.date_of_birth, cow.age_days)}</Badge>
+                  ) : null}
                   {statusLabel ? <Badge>{statusLabel}</Badge> : null}
                   {cow.lactation?.days_in_milk != null ? (
                     <span className="text-xs text-muted-foreground tabular-nums">
@@ -222,6 +239,64 @@ export default function CattlePage() {
           );
         })}
       </div>
+
+      {list.data?.count && list.data.count > 0 ? (
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 sm:flex-row border-t border-border pt-4">
+          <p className="text-sm text-muted-foreground">
+            {t("pagination.showing", {
+              from: (page - 1) * (pageSize === "ALL" ? list.data.count : (pageSize as number)) + 1,
+              to: Math.min(
+                page * (pageSize === "ALL" ? list.data.count : (pageSize as number)),
+                list.data.count,
+              ),
+              total: list.data.count,
+            })}
+          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{t("pagination.perPage")}:</span>
+              <Select
+                name="pageSize"
+                value={pageSize.toString()}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setPageSize(val === "ALL" ? "ALL" : Number(val));
+                  setPage(1);
+                }}
+                options={[
+                  { label: "20", value: "20" },
+                  { label: "50", value: "50" },
+                  { label: "100", value: "100" },
+                  { label: t("pagination.all"), value: "ALL" },
+                ]}
+              />
+            </div>
+            {pageSize !== "ALL" && Math.ceil(list.data.count / pageSize) > 1 ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  {t("pagination.previous")}
+                </Button>
+                <div className="text-sm font-medium">
+                  {page} / {Math.ceil(list.data.count / pageSize)}
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page >= Math.ceil(list.data.count / pageSize)}
+                >
+                  {t("pagination.next")}
+                </Button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

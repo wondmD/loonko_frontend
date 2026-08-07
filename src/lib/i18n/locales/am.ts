@@ -36,7 +36,17 @@ export const am: typeof en = {
     VETERINARIAN: "የጤና መዝገቦችን፣ ክትባቶችን እና የእርባታ መረጃዎችን የመከታተል ልዩ መብት።",
   },
 
+  pagination: {
+    showing: "ከ {total} ውስጥ ከ {from} እስከ {to} እያሳየ ነው",
+    previous: "ወደኋላ",
+    next: "ቀጣይ",
+    perPage: "በገጽ",
+    all: "ሁሉም",
+  },
+
   common: {
+    complete: "አጠናቅ",
+    skip: "ዝለል",
     save: "ያስቀምጡ",
     cancel: "ሰርዝ",
     delete: "አጥፋ",
@@ -200,7 +210,12 @@ export const am: typeof en = {
       sale_price: "የሽያጭ ዋጋ",
       sale_date: "የሽያጭ ቀን",
       reason: "ምክንያት (አማራጭ)",
-      reason_placeholder: "ለምሳሌ፦ የጡት በሽታ (Mastitis)"
+      reason_placeholder: "ለምሳሌ፦ የጡት በሽታ (Mastitis)",
+      deleteCattle: "ከብትን አስወግድ/አጥፋ",
+      deleteConfirmTitle: "ከብቱን ከስርዓቱ ማስወገድ ይፈልጋሉ?",
+      deleteConfirmDesc: "ይህን ከብት ከመንጋው ሙሉ በሙሉ ማስወገድ እንደሚፈልጉ እርግጠኛ ነዎት? ከዚህ ከብት ጋር የተያያዙ ሁሉም መዝገቦች ይሰረዛሉ። ይህ እርምጃ ሊመለስ አይችልም።",
+      deleteConfirmButton: "አዎ፣ ከብቱን አስወግድ",
+      deletedSuccess: "ከብቱ ከመንጋው በተሳካ ሁኔታ ተሰርዟል።"
     },
     breeds: {
       holstein: "ሆልስቲን ፍሪዥያን (Holstein Friesian)",
@@ -214,6 +229,7 @@ export const am: typeof en = {
       other: "ሌላ (Other)"
     },
     form: {
+      motherExternalId: "የእናት ውጫዊ መለያ",
       addAnimal: "እንስሳ አክል",
       photosRequired: "ፎቶዎች (ግዴታ)",
       front: "የፊት ገጽታ",
@@ -258,6 +274,7 @@ export const am: typeof en = {
   },
 
   milk: {
+    milkLogs: "የወተት መዝገቦች",
     title: "የወተት ምርት",
     subtitle: "የጠዋት እና የማታ የወተት ምርት መጠን እንዲሁም ጥራት ይመዝግቡ።",
     logYield: "የወተት ምርት መዝግብ",
@@ -283,6 +300,11 @@ export const am: typeof en = {
   },
 
   health: {
+    noTreatments: "ምንም ሕክምና አልተመዘገበም።",
+    noVaccinations: "ምንም ክትባት አልተመዘገበም።",
+    records: "የጤና መዝገቦች",
+    treatments: "ሕክምናዎች",
+    vaccine: "ክትባት",
     title: "ጤና እና እንክብካቤ",
     subtitle: "ሕክምናዎችን፣ ክትባቶችን እና የእንስሳት ሐኪም ጉብኝቶችን ይከታተሉ።",
     vaccinations: "ክትባቶች",
@@ -362,6 +384,9 @@ export const am: typeof en = {
     medium: "መካከለኛ",
     low: "ዝቅተኛ / መረጃ",
     markRead: "ተነቧል በል",
+    markAsRead: "ተነቧል በል",
+    refreshAlerts: "ማስታወቂያዎችን አድስ",
+    acknowledge: "ተረድቻለሁ",
     noAlerts: "በአሁኑ ጊዜ ምንም ማስታወቂያ የለም።",
     markAllRead: "ሁሉንም ተነቧል በል",
     noUnreadAlerts: "ያልተነበበ ማስታወቂያ የለም",
@@ -466,6 +491,11 @@ export const am: typeof en = {
   },
 
   calvingPage: {
+    calvingDate: "የመውለጃ ቀን",
+    damPregnancy: "የእናት እርግዝና",
+    newCalfHint: "የአዲሱ ጥጃ ዝርዝር",
+    noCalvingsYet: "ምንም የተመዘገበ ውልደት የለም።",
+    noPregnanciesReadyHint: "ለመውለድ የተዘጋጀ እርግዝና የለም።",
     title: "ወሊድ",
     subtitle: "ወሊድን ይመዝግቡ፣ ጥጆችን ይመዝግቡ እና የወሊድ ታሪክን ይገምግሙ።",
     recordCalving: "ወሊድ መዝግብ",
@@ -481,6 +511,10 @@ export const am: typeof en = {
   },
 
   feedPage: {
+    cattleOptional: "ከብት (አማራጭ)",
+    costOptional: "ዋጋ (አማራጭ)",
+    noFeedLogsHint: "ምንም የመኖ መዝገብ የለም።",
+    wholeHerd: "ሙሉ መንጋ",
     title: "የመኖ መዝገብ",
     subtitle: "ለከብቶች የተሰጠ መኖ። አማራጭ ወጪ ወደ ፋይናንስ ይላካል።",
     logFeed: "መኖ መዝግብ",

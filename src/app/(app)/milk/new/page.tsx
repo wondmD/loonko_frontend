@@ -25,13 +25,15 @@ const schema = Yup.object({
 function MilkNewForm() {
   const router = useRouter();
   const milk = useMilk();
-  const cattle = useCattle({ status: "ACTIVE", herd_filter: "milking" });
+  const cattle = useCattle({ status: "ACTIVE", sex: "FEMALE", limit: 1000 });
   const { t } = useTranslation();
   const options =
-    cattle.list.data?.results.map((c) => ({
-      label: `${c.tag_id}${c.name ? ` — ${c.name}` : ""}`,
-      value: String(c.id),
-    })) ?? [];
+    cattle.list.data?.results
+      .filter((c) => c.life_stage?.category !== "CALF" && c.life_stage?.code !== "CALF")
+      .map((c) => ({
+        label: `${c.tag_id}${c.name ? ` — ${c.name}` : ""}`,
+        value: String(c.id),
+      })) ?? [];
 
   return (
     <div>

@@ -36,7 +36,17 @@ export const om: typeof en = {
     VETERINARIAN: "Hayyama addaa galmee fayyaa, talaallii fi hormaata beeyladaa hordofuu.",
   },
 
+  pagination: {
+    showing: "{total} keessaa {from} hanga {to} agarsiisaa jira",
+    previous: "Dura",
+    next: "Itti Aanu",
+    perPage: "Fuula tokkotti",
+    all: "Hunda",
+  },
+
   common: {
+    complete: "Xumuri",
+    skip: "Darbi",
     save: "Olkaa'i",
     cancel: "Dhiisi",
     delete: "Haqi",
@@ -200,7 +210,12 @@ export const om: typeof en = {
       sale_price: "Gatii Gurgurtaa",
       sale_date: "Guyyaa Gurgurtaa",
       reason: "Sababa (Filannoo)",
-      reason_placeholder: "Fkn. Dhukkuba mucha (Mastitis)"
+      reason_placeholder: "Fkn. Dhukkuba mucha (Mastitis)",
+      deleteCattle: "Saa Balleessi/Haqi",
+      deleteConfirmTitle: "Saa kana qonnaa irraa balleessuu barbaadduu?",
+      deleteConfirmDesc: "Saa kana sirna keessaa guutummaatti balleessuu akka barbaaddan mirkaneeffadhaa? Galmeewwan saa kanaan walqabatan hunduu ni haqamu. Gochi kun hin deebi'u.",
+      deleteConfirmButton: "Eeyyee, Saa Balleessi",
+      deletedSuccess: "Saan milkaa'inaan qonnaa irraa haqameera."
     },
     breeds: {
       holstein: "Holstein Friesian",
@@ -214,6 +229,7 @@ export const om: typeof en = {
       other: "Kan biroo (Other)"
     },
     form: {
+      motherExternalId: "ID Haadhaa Alaa",
       addAnimal: "Saa Galmeessi",
       photosRequired: "Suuraa (Dirqama)",
       front: "Fuuldura",
@@ -258,6 +274,7 @@ export const om: typeof en = {
   },
 
   milk: {
+    milkLogs: "Galmee Aanaanii",
     title: "Oomisha Aanaanii",
     subtitle: "Oomisha aanan ganamaa fi galgalaa guyyaa guyyaan galmeessaa.",
     logYield: "Omisha Aannanii Galmeessi",
@@ -283,6 +300,11 @@ export const om: typeof en = {
   },
 
   health: {
+    noTreatments: "Yaalii galmaa'e hin jiru.",
+    noVaccinations: "Talaallii galmaa'e hin jiru.",
+    records: "Galmee Fayyaa",
+    treatments: "Yaaliiwwan",
+    vaccine: "Talaallii",
     title: "Fayyaa fi Kunuunsa",
     subtitle: "Yaala, talaallii fi daawwanna doktora beeyladaa hordofaa.",
     vaccinations: "Talaalliiwwan",
@@ -362,6 +384,9 @@ export const om: typeof en = {
     medium: "Giddu-galeessa",
     low: "Gadi-aanaa / Odeeffannoo",
     markRead: "Dubbifameera",
+    markAsRead: "Dubbifameera",
+    refreshAlerts: "Beeksisa Haaresi",
+    acknowledge: "Hubadheera",
     noAlerts: "Yeroo kana beeksisni hin jiru.",
     markAllRead: "Hunda Dubbifameera Sii",
     noUnreadAlerts: "Beeksisni hin dubbifamne hin jiru",
@@ -466,6 +491,11 @@ export const om: typeof en = {
   },
 
   calvingPage: {
+    calvingDate: "Guyyaa Dhalootaa",
+    damPregnancy: "Ulfa Haadhaa",
+    newCalfHint: "Odeeffannoo Jabbii Haaraa",
+    noCalvingsYet: "Dhalootni galmaa'e hin jiru.",
+    noPregnanciesReadyHint: "Ulfni dhaluuf qophaa'e hin jiru.",
     title: "Dhaloota",
     subtitle: "Dhaloota galmeessaa, jabbilee galmeessaa, fi seenaa dhalootaa ilaalaa.",
     recordCalving: "Dhaloota galmeessi",
@@ -481,6 +511,10 @@ export const om: typeof en = {
   },
 
   feedPage: {
+    cattleOptional: "Beeylada (Dirqama Miti)",
+    costOptional: "Gatii (Dirqama Miti)",
+    noFeedLogsHint: "Galmeen nyaataa hin jiru.",
+    wholeHerd: "Hoolaa Guutuu",
     title: "Galmee Nyaataa",
     subtitle: "Nyaata looniif kenname. Baasii filannoo gara Baajataatti erga.",
     logFeed: "Nyaata galmeessi",
