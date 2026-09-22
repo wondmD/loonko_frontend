@@ -289,28 +289,30 @@ export default function BreedingCattleDetailPage({
           }}
         >
           {({ values, handleChange, handleBlur, setFieldValue, status }) => (
-            <Form className="space-y-4">
-              <Input
-                label={t("breedingDetail.matingDate")}
-                name="mating_date"
-                type="date"
-                value={values.mating_date}
-                onChange={handleChange}
-                onBlur={handleBlur}
-              />
-              <Select
-                label={t("breedingDetail.method")}
-                name="method"
-                value={values.method}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                options={[
-                  { label: t("breedingDetail.ai"), value: "AI" },
-                  { label: t("breedingDetail.natural"), value: "NATURAL" },
-                ]}
-              />
+            <Form className="flex min-w-0 flex-col gap-3 sm:gap-4">
+              <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+                <Input
+                  label={t("breedingDetail.matingDate")}
+                  name="mating_date"
+                  type="date"
+                  value={values.mating_date}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                />
+                <Select
+                  label={t("breedingDetail.method")}
+                  name="method"
+                  value={values.method}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  options={[
+                    { label: t("breedingDetail.ai"), value: "AI" },
+                    { label: t("breedingDetail.natural"), value: "NATURAL" },
+                  ]}
+                />
+              </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="min-w-0 space-y-3 rounded-xl border border-border p-3">
                 <Select
                   label="Sire origin"
                   name="sire_origin"
@@ -356,9 +358,14 @@ export default function BreedingCattleDetailPage({
                 value={values.notes}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                className="min-h-20 sm:min-h-28"
               />
               {status ? <p className="text-sm text-danger">{status}</p> : null}
-              <Button type="submit" className="w-full" loading={breeding.createEvent.isPending}>
+              <Button
+                type="submit"
+                className="sticky bottom-0 z-10 w-full min-h-12 bg-card pt-1"
+                loading={breeding.createEvent.isPending}
+              >
                 {t("common.save")}
               </Button>
             </Form>

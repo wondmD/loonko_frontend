@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 
 export function Modal({
   open,
@@ -19,10 +19,19 @@ export function Modal({
   children: ReactNode;
   className?: string;
 }) {
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   return (
     <AnimatePresence>
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-4">
           <motion.button
             type="button"
             aria-label="Close dialog backdrop"
@@ -40,17 +49,28 @@ export function Modal({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
             className={cn(
-              "relative z-10 max-h-[90dvh] w-full overflow-y-auto rounded-t-3xl border border-border bg-card p-5 shadow-md sm:max-w-lg sm:rounded-3xl",
+              "relative z-10 flex w-full min-w-0 max-w-full flex-col overflow-hidden rounded-t-3xl border border-border bg-card shadow-md",
+              "max-h-[100svh] sm:max-h-[min(90dvh,40rem)] sm:max-w-lg sm:rounded-3xl",
               className,
             )}
           >
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="font-display text-xl font-semibold">{title}</h2>
-              <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close">
+            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border/70 px-4 py-3 sm:px-5 sm:py-4">
+              <h2 className="font-display min-w-0 flex-1 text-lg font-semibold leading-snug break-words sm:text-xl">
+                {title}
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                aria-label="Close"
+                className="shrink-0"
+              >
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            {children}
+            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-4 py-4 sm:px-5 [-webkit-overflow-scrolling:touch] pb-[max(1rem,env(safe-area-inset-bottom))]">
+              {children}
+            </div>
           </motion.div>
         </div>
       ) : null}
