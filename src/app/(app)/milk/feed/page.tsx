@@ -11,11 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { ModuleTabs } from "@/components/ui/module-tabs";
 import { PageHeader } from "@/components/ui/page-header";
-import { Select } from "@/components/ui/select";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 import { Textarea } from "@/components/ui/textarea";
+import { CattleSelect } from "@/features/cattle/components/cattle-select";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
-import { useCattle } from "@/features/cattle/hooks/use-cattle";
+import { useCattleChoices } from "@/features/cattle/hooks/use-cattle";
 import { useFeed } from "@/features/milk/hooks/use-feed";
 import { canAccess } from "@/lib/auth/access";
 import { useTranslation } from "@/lib/i18n";
@@ -38,13 +38,9 @@ function FeedContent() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const feed = useFeed();
-  const cattle = useCattle({ status: "ACTIVE", herd_filter: "milking" });
+  const cattle = useCattleChoices({ status: "ACTIVE", herd_filter: "milking" });
   const rows = feed.list.data?.results ?? [];
-  const options =
-    cattle.list.data?.results.map((c) => ({
-      label: `${c.tag_id}${c.name ? ` — ${c.name}` : ""}`,
-      value: String(c.id),
-    })) ?? [];
+  const animals = cattle.data?.results ?? [];
 
   return (
     <div>
@@ -137,13 +133,15 @@ function FeedContent() {
         >
           {({ values, handleChange, handleBlur, status }) => (
             <Form className="space-y-4">
-              <Select
+              <CattleSelect
                 label={t("feedPage.cattleOptional")}
                 name="cattle"
                 value={values.cattle}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                options={[{ label: t("feedPage.wholeHerd"), value: "" }, ...options]}
+                animals={animals}
+                isLoading={cattle.isLoading}
+                emptyOption={{ label: t("feedPage.wholeHerd"), value: "" }}
               />
               <Input
                 label={t("feedPage.feedType")}

@@ -14,8 +14,9 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 import { Textarea } from "@/components/ui/textarea";
+import { CattleSelect } from "@/features/cattle/components/cattle-select";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
-import { useCattle } from "@/features/cattle/hooks/use-cattle";
+import { useCattleChoices } from "@/features/cattle/hooks/use-cattle";
 import { useHealth } from "@/features/health/hooks/use-health";
 import { canAccess } from "@/lib/auth/access";
 import { useAuthStore } from "@/stores/auth-store";
@@ -36,13 +37,9 @@ export default function HealthPage() {
   const canWrite = canAccess(role, "healthWrite");
   const [open, setOpen] = useState(false);
   const health = useHealth();
-  const cattle = useCattle({ status: "ACTIVE" });
+  const cattle = useCattleChoices({ status: "ACTIVE" });
   const rows = health.records.data?.results ?? [];
-  const options =
-    cattle.list.data?.results.map((c) => ({
-      label: c.tag_id,
-      value: String(c.id),
-    })) ?? [];
+  const animals = cattle.data?.results ?? [];
 
   return (
     <div>
@@ -108,7 +105,7 @@ export default function HealthPage() {
       <Modal open={open} onClose={() => setOpen(false)} title={t("health.recordHealth")}>
         <Formik
           initialValues={{
-            cattle: options[0]?.value || "",
+            cattle: animals[0] ? String(animals[0].id) : "",
             recorded_at: new Date().toISOString().slice(0, 16),
             symptoms: "",
             severity: "LOW",
@@ -135,13 +132,14 @@ export default function HealthPage() {
         >
           {({ values, handleChange, handleBlur, status }) => (
             <Form className="space-y-4">
-              <Select
+              <CattleSelect
                 label={t("cattle.title")}
                 name="cattle"
                 value={values.cattle}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                options={[{ label: "Select…", value: "" }, ...options]}
+                animals={animals}
+                isLoading={cattle.isLoading}
               />
               <Input
                 label="Recorded at"

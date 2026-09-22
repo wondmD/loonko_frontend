@@ -15,10 +15,11 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 import { Textarea } from "@/components/ui/textarea";
+import { CattleSelect } from "@/features/cattle/components/cattle-select";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
 import { useBreeding } from "@/features/breeding/hooks/use-breeding";
 import { BREEDING_TABS } from "@/features/breeding/breeding-tabs";
-import { useCattle } from "@/features/cattle/hooks/use-cattle";
+import { useCattleChoices } from "@/features/cattle/hooks/use-cattle";
 import type { BreedingHerdRow } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -71,7 +72,7 @@ export default function BreedingPage() {
     "all",
   );
   const breeding = useBreeding();
-  const cattle = useCattle({ status: "ACTIVE" });
+  const cattle = useCattleChoices({ status: "ACTIVE" });
   const rows = breeding.herd.data?.results ?? [];
 
   const filtered = useMemo(() => {
@@ -79,13 +80,8 @@ export default function BreedingPage() {
     return rows.filter((r) => r.pregnancy_state === filter);
   }, [rows, filter]);
 
-  const options =
-    cattle.list.data?.results
-      .filter((c) => c.sex !== "MALE")
-      .map((c) => ({
-        label: `${c.tag_id}${c.name ? ` — ${c.name}` : ""}`,
-        value: String(c.id),
-      })) ?? [];
+  const dams = (cattle.data?.results ?? []).filter((c) => c.sex !== "MALE");
+  const sires = (cattle.data?.results ?? []).filter((c) => c.sex === "MALE");
 
   const counts = useMemo(
     () => ({
@@ -283,7 +279,7 @@ export default function BreedingPage() {
       <Modal open={open} onClose={() => setOpen(false)} title={t("breeding.recordInsemination")}>
         <Formik
           initialValues={{
-            dam: options[0]?.value || "",
+            dam: dams[0] ? String(dams[0].id) : "",
             mating_date: new Date().toISOString().slice(0, 10),
             method: "AI",
             sire_origin: "NONE",
@@ -311,13 +307,14 @@ export default function BreedingPage() {
         >
           {({ values, errors, touched, handleChange, handleBlur, setFieldValue, status }) => (
             <Form className="space-y-4">
-              <Select
+              <CattleSelect
                 label={t("cattle.motherTag")}
                 name="dam"
                 value={values.dam}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                options={[{ label: "Select…", value: "" }, ...options]}
+                animals={dams}
+                isLoading={cattle.isLoading}
                 error={touched.dam ? errors.dam : undefined}
               />
               <Input
@@ -359,21 +356,14 @@ export default function BreedingPage() {
                   ]}
                 />
                 {values.sire_origin === "INTERNAL" && (
-                  <Select
+                  <CattleSelect
                     label="Select Bull"
                     name="sire"
                     value={values.sire}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    options={[
-                      { label: "Select…", value: "" },
-                      ...(cattle.list.data?.results
-                        ?.filter((c) => c.sex === "MALE")
-                        .map((c) => ({
-                          label: `${c.tag_id} - ${c.name || "Unnamed"}`,
-                          value: String(c.id),
-                        })) ?? []),
-                    ]}
+                    animals={sires}
+                    isLoading={cattle.isLoading}
                   />
                 )}
                 {values.sire_origin === "EXTERNAL" && (

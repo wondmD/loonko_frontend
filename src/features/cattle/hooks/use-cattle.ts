@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { cattleApi } from "@/lib/api/services";
 import { invalidateFarmModules } from "@/lib/query/invalidate";
-import type { CattleDetail } from "@/types";
+import type { CattleChoice, CattleDetail } from "@/types";
 
 export function useCattle(params?: Record<string, string | number | undefined>) {
   const queryClient = useQueryClient();
@@ -44,6 +44,18 @@ export function useCattle(params?: Record<string, string | number | undefined>) 
   });
 
   return { list, facets, create, update, remove };
+}
+
+/** Full-herd lookup for milk / breeding / health pickers (not the paginated herd table). */
+export function useCattleChoices(params?: Record<string, string | number | undefined>) {
+  return useQuery({
+    queryKey: ["cattle", "choices", params],
+    queryFn: () => cattleApi.choices(params),
+  });
+}
+
+export function cattleChoiceLabel(cattle: CattleChoice) {
+  return `${cattle.tag_id}${cattle.name ? ` — ${cattle.name}` : ""}`;
 }
 
 export function useCattleDetail(id: number) {

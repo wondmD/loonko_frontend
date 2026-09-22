@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
-import { Select } from "@/components/ui/select";
+import { CattleSelect } from "@/features/cattle/components/cattle-select";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
-import { useCattle } from "@/features/cattle/hooks/use-cattle";
+import { useCattleChoices } from "@/features/cattle/hooks/use-cattle";
 import { useMilk } from "@/features/milk/hooks/use-milk";
 import { useTranslation } from "@/lib/i18n";
 
@@ -25,15 +25,16 @@ const schema = Yup.object({
 function MilkNewForm() {
   const router = useRouter();
   const milk = useMilk();
-  const cattle = useCattle({ status: "ACTIVE", sex: "FEMALE", limit: 1000 });
+  const cattle = useCattleChoices({ status: "ACTIVE", sex: "FEMALE" });
   const { t } = useTranslation();
-  const options =
-    cattle.list.data?.results
-      .filter((c) => c.life_stage?.category !== "CALF" && c.life_stage?.code !== "CALF")
-      .map((c) => ({
-        label: `${c.tag_id}${c.name ? ` — ${c.name}` : ""}`,
-        value: String(c.id),
-      })) ?? [];
+  const animals = cattle.data?.results ?? [];
+  const options = animals.filter((c) => {
+    if (!c.date_of_birth) return true;
+    const born = new Date(`${c.date_of_birth}T00:00:00`);
+    if (Number.isNaN(born.getTime())) return true;
+    const ageDays = Math.floor((Date.now() - born.getTime()) / 86_400_000);
+    return ageDays >= 90;
+  });
 
   return (
     <div>
@@ -45,7 +46,7 @@ function MilkNewForm() {
         <CardContent>
           <Formik
             initialValues={{
-              cattle: options[0]?.value || "",
+              cattle: options[0] ? String(options[0].id) : "",
               date: new Date().toISOString().slice(0, 10),
               morning_liters: 0,
               evening_liters: 0,
@@ -68,13 +69,14 @@ function MilkNewForm() {
           >
             {({ values, errors, touched, handleChange, handleBlur, status }) => (
               <Form className="space-y-4">
-                <Select
+                <CattleSelect
                   label={t("cattle.title")}
                   name="cattle"
                   value={values.cattle}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  options={[{ label: `${t("common.select")}…`, value: "" }, ...options]}
+                  animals={options}
+                  isLoading={cattle.isLoading}
                   error={touched.cattle ? errors.cattle : undefined}
                 />
                 <Input

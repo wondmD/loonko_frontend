@@ -107,6 +107,15 @@ export interface HusbandryPlan {
   warnings: HusbandryWarning[];
 }
 
+export interface CattleChoice {
+  id: number;
+  tag_id: string;
+  name: string;
+  sex: "FEMALE" | "MALE";
+  status: "ACTIVE" | "SOLD" | "DEAD" | "CULLED";
+  date_of_birth: string | null;
+}
+
 export interface Cattle {
   id: number;
   tag_id: string;

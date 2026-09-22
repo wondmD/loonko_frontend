@@ -15,7 +15,7 @@ export function useBreeding() {
 
   const pregnancies = useQuery({
     queryKey: ["breeding", "pregnancies"],
-    queryFn: () => breedingApi.listPregnancies(),
+    queryFn: () => breedingApi.listPregnancies({ page_size: 1000 }),
   });
 
   const births = useQuery({

@@ -13,7 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
 import { useTranslation } from "@/lib/i18n";
 import { PhotoUploadField } from "@/features/cattle/components/cattle-photo";
-import { buildCattleFormData, useCattle } from "@/features/cattle/hooks/use-cattle";
+import { CattleSelect } from "@/features/cattle/components/cattle-select";
+import { buildCattleFormData, useCattle, useCattleChoices } from "@/features/cattle/hooks/use-cattle";
 import { husbandryApi } from "@/lib/api/services";
 import { formatAge } from "@/lib/utils/format-age";
 
@@ -63,7 +64,9 @@ export function AddCattleModal({
   onClose: () => void;
 }) {
   const { language, t } = useTranslation();
-  const { create, list: cattleListQuery } = useCattle({ limit: 1000 }); // Remove sex="FEMALE" so we can pick bulls too
+  const { create } = useCattle();
+  const cattleChoices = useCattleChoices();
+  const herd = cattleChoices.data?.results ?? [];
   const settings = useQuery({
     queryKey: ["husbandry", "settings"],
     queryFn: husbandryApi.settings,
@@ -340,21 +343,15 @@ export function AddCattleModal({
                     ]}
                   />
                   {values.mother_origin === "INTERNAL" && (
-                    <Select
+                    <CattleSelect
                       label={t("cattle.form.selectMother")}
                       name="mother"
                       value={values.mother}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      options={[
-                        { label: "Select…", value: "" },
-                        ...(cattleListQuery.data?.results
-                          ?.filter(c => c.sex === "FEMALE" && c.life_stage?.category !== "CALF")
-                          .map((c) => ({
-                            label: `${c.tag_id} - ${c.name || "Unnamed"}`,
-                            value: String(c.id),
-                          })) ?? []),
-                      ]}
+                      animals={herd}
+                      isLoading={cattleChoices.isLoading}
+                      filter={(c) => c.sex === "FEMALE"}
                     />
                   )}
                   {values.mother_origin === "EXTERNAL" && (
@@ -387,21 +384,15 @@ export function AddCattleModal({
                     ]}
                   />
                   {values.father_origin === "INTERNAL" && (
-                    <Select
+                    <CattleSelect
                       label="Select Sire"
                       name="father"
                       value={values.father}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      options={[
-                        { label: "Select…", value: "" },
-                        ...(cattleListQuery.data?.results
-                          ?.filter(c => c.sex === "MALE")
-                          .map((c) => ({
-                            label: `${c.tag_id} - ${c.name || "Unnamed"}`,
-                            value: String(c.id),
-                          })) ?? []),
-                      ]}
+                      animals={herd}
+                      isLoading={cattleChoices.isLoading}
+                      filter={(c) => c.sex === "MALE"}
                     />
                   )}
                   {values.father_origin === "EXTERNAL" && (
@@ -474,21 +465,15 @@ export function AddCattleModal({
                           ]}
                         />
                         {values.insemination_sire_origin === "INTERNAL" && (
-                          <Select
+                          <CattleSelect
                             label="Select Bull"
                             name="insemination_sire"
                             value={values.insemination_sire}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            options={[
-                              { label: "Select…", value: "" },
-                              ...(cattleListQuery.data?.results
-                                ?.filter((c) => c.sex === "MALE")
-                                .map((c) => ({
-                                  label: `${c.tag_id} - ${c.name || "Unnamed"}`,
-                                  value: String(c.id),
-                                })) ?? []),
-                            ]}
+                            animals={herd}
+                            isLoading={cattleChoices.isLoading}
+                            filter={(c) => c.sex === "MALE"}
                           />
                         )}
                         {values.insemination_sire_origin === "EXTERNAL" && (

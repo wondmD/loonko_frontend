@@ -7,6 +7,7 @@ import type {
   BreedingHerdOverview,
   BreedingUpcomingBoard,
   Cattle,
+  CattleChoice,
   CattleDetail,
   Farm,
   FeedSchedule,
@@ -65,6 +66,8 @@ export const farmApi = {
 export const cattleApi = {
   list: (params?: Record<string, string | number | undefined>) =>
     apiClient.get<Paginated<Cattle>>("/cattle/", { params }).then((r) => r.data),
+  choices: (params?: Record<string, string | number | undefined>) =>
+    apiClient.get<Paginated<CattleChoice>>("/cattle/choices/", { params }).then((r) => r.data),
   facets: (params?: Record<string, string | number | undefined>) =>
     apiClient
       .get<{

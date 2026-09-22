@@ -11,10 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { ModuleTabs } from "@/components/ui/module-tabs";
 import { PageHeader } from "@/components/ui/page-header";
-import { Select } from "@/components/ui/select";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
+import { CattleSelect } from "@/features/cattle/components/cattle-select";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
-import { useCattle } from "@/features/cattle/hooks/use-cattle";
+import { useCattleChoices } from "@/features/cattle/hooks/use-cattle";
 import { useHealth } from "@/features/health/hooks/use-health";
 import { useTranslation } from "@/lib/i18n";
 import { formatMoney } from "@/lib/utils/cn";
@@ -35,10 +35,9 @@ export default function VaccinationsPage() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const health = useHealth();
-  const cattle = useCattle({ status: "ACTIVE" });
+  const cattle = useCattleChoices({ status: "ACTIVE" });
   const rows = health.vaccinations.data?.results ?? [];
-  const options =
-    cattle.list.data?.results.map((c) => ({ label: c.tag_id, value: String(c.id) })) ?? [];
+  const animals = cattle.data?.results ?? [];
 
   return (
     <div>
@@ -96,7 +95,7 @@ export default function VaccinationsPage() {
       <Modal open={open} onClose={() => setOpen(false)} title={`${t("common.add")} ${t("health.vaccinations")}`}>
         <Formik
           initialValues={{
-            cattle: options[0]?.value || "",
+            cattle: animals[0] ? String(animals[0].id) : "",
             vaccine_name: "",
             administered_on: new Date().toISOString().slice(0, 10),
             next_due_on: "",
@@ -125,13 +124,14 @@ export default function VaccinationsPage() {
         >
           {({ values, handleChange, handleBlur, status }) => (
             <Form className="space-y-4">
-              <Select
+              <CattleSelect
                 label={t("cattle.title")}
                 name="cattle"
                 value={values.cattle}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                options={[{ label: `${t("common.select")}…`, value: "" }, ...options]}
+                animals={animals}
+                isLoading={cattle.isLoading}
               />
               <Input
                 label={t("health.vaccine")}

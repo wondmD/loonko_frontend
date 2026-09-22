@@ -16,12 +16,10 @@ import { Select } from "@/components/ui/select";
 import { StatCard } from "@/components/ui/stat-card";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/states";
 import { Textarea } from "@/components/ui/textarea";
+import { CattleSelect } from "@/features/cattle/components/cattle-select";
 import { getMutationError } from "@/features/auth/hooks/use-auth";
-import {
-  useBreeding,
-  useBreedingCattleHistory,
-} from "@/features/breeding/hooks/use-breeding";
-import { useCattle } from "@/features/cattle/hooks/use-cattle";
+import { useBreeding, useBreedingCattleHistory } from "@/features/breeding/hooks/use-breeding";
+import { useCattleChoices } from "@/features/cattle/hooks/use-cattle";
 import { useAuthStore } from "@/stores/auth-store";
 
 import { useTranslation } from "@/lib/i18n";
@@ -68,7 +66,10 @@ export default function BreedingCattleDetailPage({
   const [open, setOpen] = useState(false);
   const history = useBreedingCattleHistory(cattleId);
   const breeding = useBreeding();
-  const { list: cattleListQuery } = useCattle({ limit: 1000 });
+  const { data: cattleChoices, isLoading: cattleChoicesLoading } = useCattleChoices({
+    status: "ACTIVE",
+  });
+  const sires = (cattleChoices?.results ?? []).filter((c) => c.sex === "MALE");
   const data = history.data;
 
   if (history.isLoading) return <LoadingState />;
@@ -327,21 +328,14 @@ export default function BreedingCattleDetailPage({
                   ]}
                 />
                 {values.sire_origin === "INTERNAL" && (
-                  <Select
+                  <CattleSelect
                     label="Select Sire"
                     name="sire"
                     value={values.sire}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    options={[
-                      { label: "Select…", value: "" },
-                      ...(cattleListQuery.data?.results
-                        ?.filter(c => c.sex === "MALE")
-                        .map((c) => ({
-                          label: `${c.tag_id} - ${c.name || "Unnamed"}`,
-                          value: String(c.id),
-                        })) ?? []),
-                    ]}
+                    animals={sires}
+                    isLoading={cattleChoicesLoading}
                   />
                 )}
                 {values.sire_origin === "EXTERNAL" && (
